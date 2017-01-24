@@ -157,6 +157,7 @@ export class WorkItemService {
   getWorkItemById(id: string): Promise<WorkItem> {
     let url = this.workItemUrl;
     if (id in this.workItemIdIndexMap) {
+      console.log('Still found');
       let wItem = this.workItems[this.workItemIdIndexMap[id]];
       this.resolveComments(wItem);
       this.resolveLinks(wItem);
