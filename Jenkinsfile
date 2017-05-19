@@ -10,8 +10,8 @@ fabric8UITemplate{
         ws {
             if (utils.isCI()){
                 checkout scm
-                readTrusted 'release.groovy'
-                def pipeline = load 'release.groovy'
+                readTrusted 'deploy/release.groovy'
+                def pipeline = load 'deploy/release.groovy'
 
                 container('ui'){
                     pipeline.ci()
@@ -32,9 +32,9 @@ fabric8UITemplate{
             } else if (utils.isCD()){
 
                 git "https://github.com/${project}.git"
-                readTrusted 'release.groovy'
+                readTrusted 'deploy/release.groovy'
                 sh "git remote set-url origin git@github.com:${project}.git"
-                def pipeline = load 'release.groovy'
+                def pipeline = load 'deploy/release.groovy'
 
                 container('ui'){
                     pipeline.ci()
