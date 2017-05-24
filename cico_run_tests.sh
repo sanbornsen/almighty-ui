@@ -20,9 +20,9 @@ fi
 
 # Get all the deps in
 yum -y install \
-  docker \
-  make \
-  git
+ docker \
+ make \
+ git
 service docker start
 
 # Build builder image
@@ -39,7 +39,7 @@ docker exec fabric8-planner-builder npm install
 docker exec fabric8-planner-builder npm run test:unit
 
 ## Exec functional tests
-docker exec fabric8-planner-builder ./run_functional_tests.sh smokeTest
+docker exec fabric8-planner-builder ./deploy/run_functional_tests.sh smokeTest
 
 ## All ok, build prod version
 docker exec fabric8-planner-builder npm run build
