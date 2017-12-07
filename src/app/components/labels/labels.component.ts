@@ -24,7 +24,6 @@ export class LabelsComponent implements OnInit {
   private _labels: LabelModel[] = [];
 
   @Input('labels') set labelInput(labels: LabelModel[]) {
-    console.log('#### - 1', labels);
     this._labels = labels.filter(label => {
       return label.attributes &&
         label.attributes['background-color'] &&
