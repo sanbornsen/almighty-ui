@@ -161,7 +161,6 @@ export class PlannerListComponent implements OnInit, AfterViewInit, AfterViewChe
     private urlService: UrlService,
     private renderer: Renderer2,
     private store: Store<IterationState> ) {
-      store.select('iteration').subscribe((iterations)=>{this.iterations=iterations});
       store.dispatch(new IterationActions.Get());
     }
 
@@ -381,7 +380,7 @@ export class PlannerListComponent implements OnInit, AfterViewInit, AfterViewChe
     this.children = [];
     const t1 = performance.now();
     this.wiSubscriber = Observable.combineLatest(
-      this.store.select('iteration'),
+      this.store.select('iterations'),
       // this.collaboratorService.getCollaborators(),
       this.workItemService.getWorkItemTypes(),
       this.areaService.getAreas(),
