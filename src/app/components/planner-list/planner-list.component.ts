@@ -380,11 +380,7 @@ export class PlannerListComponent implements OnInit, AfterViewInit, AfterViewChe
     this.children = [];
     const t1 = performance.now();
     this.wiSubscriber = Observable.combineLatest(
-<<<<<<< HEAD
       this.store.select('iterations'),
-=======
-      this.store.select('iteration'),
->>>>>>> 8601e8ca18827cf003a351c4f31c15d47badca55
       // this.collaboratorService.getCollaborators(),
       this.workItemService.getWorkItemTypes(),
       this.areaService.getAreas(),
