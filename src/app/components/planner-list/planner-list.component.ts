@@ -8,6 +8,9 @@ import { IterationService } from '../../services/iteration.service';
 import { IterationModel } from '../../models/iteration.model';
 import { Subscription } from 'rxjs/Subscription';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Store } from '@ngrx/store';
+import * as IterationActions from '../../actions/iteration.actions';
+import { IterationState } from '../../states/iteration.state';
 import {
   AfterViewInit,
   Component,
@@ -114,8 +117,8 @@ export class PlannerListComponent implements OnInit, AfterViewInit, AfterViewChe
   eventListeners: any[] = [];
   showHierarchyList: boolean = true;
   sidePanelOpen: boolean = true;
-  private spaceSubscription: Subscription = null;
-  private iterations: IterationModel[] = [];
+  private spaceSubscription: Subscription = null; 
+  private iterations: IterationModel[];
   private areas: AreaModel[] = [];
   private nextLink: string = '';
   private wiSubscriber: any = null;
@@ -156,7 +159,11 @@ export class PlannerListComponent implements OnInit, AfterViewInit, AfterViewChe
     private spaces: Spaces,
     private userService: UserService,
     private urlService: UrlService,
-    private renderer: Renderer2) {}
+    private renderer: Renderer2,
+    private store: Store<IterationState> ) {
+      store.select('iteration').subscribe((iterations)=>{this.iterations=iterations});
+      store.dispatch(new IterationActions.Get());
+    }
 
   ngOnInit(): void {
     // If there is an iteration on the URL
@@ -374,7 +381,7 @@ export class PlannerListComponent implements OnInit, AfterViewInit, AfterViewChe
     this.children = [];
     const t1 = performance.now();
     this.wiSubscriber = Observable.combineLatest(
-      this.iterationService.getIterations(),
+      this.store.select('iteration'),
       // this.collaboratorService.getCollaborators(),
       this.workItemService.getWorkItemTypes(),
       this.areaService.getAreas(),
