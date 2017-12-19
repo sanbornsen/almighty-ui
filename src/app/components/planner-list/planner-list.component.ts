@@ -163,7 +163,9 @@ export class PlannerListComponent implements OnInit, AfterViewInit, AfterViewChe
     private userService: UserService,
     private urlService: UrlService,
     private renderer: Renderer2,
-    private store: Store<AppState>) {}
+    private store: Store<AppState> ) {
+      store.dispatch(new IterationActions.Get());
+    }
 
   ngOnInit(): void {
 
