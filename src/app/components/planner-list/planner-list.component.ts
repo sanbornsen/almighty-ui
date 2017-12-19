@@ -10,7 +10,7 @@ import { Subscription } from 'rxjs/Subscription';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Store } from '@ngrx/store';
 import * as IterationActions from '../../actions/iteration.actions';
-import { IterationState } from '../../states/iteration.state';
+import { AppState } from '../../states/app.state';
 import {
   AfterViewInit,
   Component,
@@ -160,7 +160,7 @@ export class PlannerListComponent implements OnInit, AfterViewInit, AfterViewChe
     private userService: UserService,
     private urlService: UrlService,
     private renderer: Renderer2,
-    private store: Store<IterationState> ) {
+    private store: Store<AppState> ) {
       store.dispatch(new IterationActions.Get());
     }
 
@@ -380,11 +380,7 @@ export class PlannerListComponent implements OnInit, AfterViewInit, AfterViewChe
     this.children = [];
     const t1 = performance.now();
     this.wiSubscriber = Observable.combineLatest(
-<<<<<<< HEAD
-      this.store.select('iterations'),
-=======
-      this.store.select('iteration'),
->>>>>>> 8601e8ca18827cf003a351c4f31c15d47badca55
+      this.store.select((iterations : AppState) => iterations.iterationState.iterations),
       // this.collaboratorService.getCollaborators(),
       this.workItemService.getWorkItemTypes(),
       this.areaService.getAreas(),
