@@ -1,4 +1,3 @@
-import { iterationReducer } from './../../reducers/iteration-reducer';
 import { NgModule }         from '@angular/core';
 import { CommonModule }     from '@angular/common';
 
@@ -49,9 +48,13 @@ import { AssigneesModule } from './../assignee/assignee.module';
 import { WorkItemDataService } from './../../services/work-item-data.service';
 import { EventService } from './../../services/event.service';
 
+// ngrx stuff
 import {
   StoreModule
 } from '@ngrx/store';
+import { IterationState, initialState as initialIterationState } from './../../states/iteration.state';
+import { iterationReducer } from './../../reducers/iteration-reducer';
+
 
 let providers = [];
 
@@ -119,7 +122,11 @@ if (process.env.ENV == 'inmemory') {
     WorkItemDetailAddTypeSelectorModule,
     PlannerModalModule,
     StoreModule.forFeature('listPage', {
-      iteration: iterationReducer
+        iterations: iterationReducer
+      }, {
+      initialState: {
+        iterations: initialIterationState
+      }
     })
   ],
   declarations: [
