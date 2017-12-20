@@ -1,5 +1,4 @@
-import { WorkItemDataService } from './../../services/work-item-data.service';
-import { EventService } from './../../services/event.service';
+import { iterationReducer } from './../../reducers/iteration-reducer';
 import { NgModule }         from '@angular/core';
 import { CommonModule }     from '@angular/common';
 
@@ -47,6 +46,12 @@ import { MockHttp } from '../../mock/mock-http';
 import { HttpService } from '../../services/http-service';
 import { LabelService } from '../../services/label.service';
 import { AssigneesModule } from './../assignee/assignee.module';
+import { WorkItemDataService } from './../../services/work-item-data.service';
+import { EventService } from './../../services/event.service';
+
+import {
+  StoreModule
+} from '@ngrx/store';
 
 let providers = [];
 
@@ -112,7 +117,10 @@ if (process.env.ENV == 'inmemory') {
     WorkItemDetailModule,
     WorkItemQuickAddModule,
     WorkItemDetailAddTypeSelectorModule,
-    PlannerModalModule
+    PlannerModalModule,
+    StoreModule.forFeature('listPage', {
+      iteration: iterationReducer
+    })
   ],
   declarations: [
     PlannerListComponent,

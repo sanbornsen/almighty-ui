@@ -8,9 +8,12 @@ import { IterationService } from '../../services/iteration.service';
 import { IterationModel } from '../../models/iteration.model';
 import { Subscription } from 'rxjs/Subscription';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+<<<<<<< HEAD
 import { Store } from '@ngrx/store';
 import * as IterationActions from '../../actions/iteration.actions';
 import { AppState } from '../../states/app.state';
+=======
+>>>>>>> fix(ngrx): Initial installation of ngrx in planner runtime and source
 import {
   AfterViewInit,
   Component,
@@ -117,8 +120,8 @@ export class PlannerListComponent implements OnInit, AfterViewInit, AfterViewChe
   eventListeners: any[] = [];
   showHierarchyList: boolean = true;
   sidePanelOpen: boolean = true;
-  private spaceSubscription: Subscription = null; 
-  private iterations: IterationModel[];
+  private spaceSubscription: Subscription = null;
+  private iterations: IterationModel[] = [];
   private areas: AreaModel[] = [];
   private nextLink: string = '';
   private wiSubscriber: any = null;
@@ -160,9 +163,7 @@ export class PlannerListComponent implements OnInit, AfterViewInit, AfterViewChe
     private userService: UserService,
     private urlService: UrlService,
     private renderer: Renderer2,
-    private store: Store<AppState> ) {
-      store.dispatch(new IterationActions.Get());
-    }
+    private store: Store<AppState> ) {}
 
   ngOnInit(): void {
     // If there is an iteration on the URL
@@ -380,7 +381,7 @@ export class PlannerListComponent implements OnInit, AfterViewInit, AfterViewChe
     this.children = [];
     const t1 = performance.now();
     this.wiSubscriber = Observable.combineLatest(
-      this.store.select((iterations : AppState) => iterations.iterationState.iterations),
+      this.iterationService.getIterations(),
       // this.collaboratorService.getCollaborators(),
       this.workItemService.getWorkItemTypes(),
       this.areaService.getAreas(),
