@@ -68,6 +68,7 @@ import { setTimeout } from 'core-js/library/web/timers';
 // ngrx stuff
 import { Store } from '@ngrx/store';
 import { AppState } from './../../states/app.state';
+import * as IterationActions from './../../actions/iteration.actions';
 
 @Component({
   encapsulation: ViewEncapsulation.None,
@@ -172,6 +173,8 @@ export class PlannerListComponent implements OnInit, AfterViewChecked, OnDestroy
     this.store.subscribe((val) => {
       console.log('####-1', val);
     })
+
+    this.store.dispatch(new IterationActions.Get());
 
     // If there is an iteration on the URL
     // Setting the value to currentIteration
