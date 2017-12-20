@@ -9,12 +9,6 @@ import { IterationService } from '../../services/iteration.service';
 import { IterationModel } from '../../models/iteration.model';
 import { Subscription } from 'rxjs/Subscription';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-<<<<<<< HEAD
-import { Store } from '@ngrx/store';
-import * as IterationActions from '../../actions/iteration.actions';
-import { AppState } from '../../states/app.state';
-=======
->>>>>>> fix(ngrx): Initial installation of ngrx in planner runtime and source
 import {
   AfterViewInit,
   Component,
@@ -79,6 +73,7 @@ import { setTimeout } from 'core-js/library/web/timers';
 // ngrx stuff
 import { Store } from '@ngrx/store';
 import { AppState } from './../../states/app.state';
+import * as IterationActions from './../../actions/iteration.actions';
 
 @Component({
   encapsulation: ViewEncapsulation.None,
@@ -175,6 +170,8 @@ export class PlannerListComponent implements OnInit, AfterViewInit, AfterViewChe
     this.store.subscribe((val) => {
       console.log('####-1', val);
     })
+
+    this.store.dispatch(new IterationActions.Get());
 
     // If there is an iteration on the URL
     // Setting the value to currentIteration
