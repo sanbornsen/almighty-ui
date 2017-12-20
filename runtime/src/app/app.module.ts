@@ -131,7 +131,8 @@ if (process.env.ENV == 'inmemory') {
     TabsModule,
     TooltipModule.forRoot(),
     TruncateModule,
-    StoreModule.forRoot({})
+    StoreModule.forRoot({}),
+    EffectsModule.forRoot([])
   ],
   declarations: [
     AppComponent,
