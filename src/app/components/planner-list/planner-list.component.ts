@@ -9,7 +9,6 @@ import { IterationService } from '../../services/iteration.service';
 import { IterationModel } from '../../models/iteration.model';
 import { Subscription } from 'rxjs/Subscription';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-
 import {
   AfterViewInit,
   Component,
