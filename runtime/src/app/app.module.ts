@@ -1,3 +1,4 @@
+import { EffectsModule } from '@ngrx/effects';
 import './rxjs-extensions';
 
 import { ModuleWithProviders, NgModule } from '@angular/core';
@@ -39,6 +40,10 @@ import { LoginService } from './services/login.service';
 // App components
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
+
+import {
+  StoreModule
+} from '@ngrx/store';
 
 // conditionally import the inmemory resource module
 let serviceImports: Array<any[] | any | ModuleWithProviders>;
@@ -125,7 +130,9 @@ if (process.env.ENV == 'inmemory') {
     ModalModule,
     TabsModule,
     TooltipModule.forRoot(),
-    TruncateModule
+    TruncateModule,
+    StoreModule.forRoot({}),
+    EffectsModule.forRoot([])
   ],
   declarations: [
     AppComponent,

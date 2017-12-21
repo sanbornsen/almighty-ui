@@ -1,3 +1,4 @@
+
 import { EventService } from './../../services/event.service';
 import { AreaModel } from '../../models/area.model';
 import { AreaService } from '../../services/area.service';
@@ -8,9 +9,6 @@ import { IterationService } from '../../services/iteration.service';
 import { IterationModel } from '../../models/iteration.model';
 import { Subscription } from 'rxjs/Subscription';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Store } from '@ngrx/store';
-import * as IterationActions from '../../actions/iteration.actions';
-import { AppState } from '../../states/app.state';
 import {
   AfterViewInit,
   Component,
@@ -72,6 +70,11 @@ import { UrlService } from './../../services/url.service';
 import { WorkItemDetailAddTypeSelectorComponent } from './../work-item-create/work-item-create.component';
 import { setTimeout } from 'core-js/library/web/timers';
 
+// ngrx stuff
+import { Store } from '@ngrx/store';
+import { AppState } from './../../states/app.state';
+import * as IterationActions from './../../actions/iteration.actions';
+
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
@@ -117,8 +120,8 @@ export class PlannerListComponent implements OnInit, AfterViewInit, AfterViewChe
   eventListeners: any[] = [];
   showHierarchyList: boolean = true;
   sidePanelOpen: boolean = true;
-  private spaceSubscription: Subscription = null; 
-  private iterations: IterationModel[];
+  private spaceSubscription: Subscription = null;
+  private iterations: IterationModel[] = [];
   private areas: AreaModel[] = [];
   private nextLink: string = '';
   private wiSubscriber: any = null;
@@ -160,11 +163,16 @@ export class PlannerListComponent implements OnInit, AfterViewInit, AfterViewChe
     private userService: UserService,
     private urlService: UrlService,
     private renderer: Renderer2,
-    private store: Store<AppState> ) {
-      store.dispatch(new IterationActions.Get());
-    }
+    private store: Store<AppState>) {}
 
   ngOnInit(): void {
+
+    this.store.subscribe((val) => {
+      console.log('####-1', val);
+    })
+
+    this.store.dispatch(new IterationActions.Get());
+
     // If there is an iteration on the URL
     // Setting the value to currentIteration
     // BehaviorSubject so that we can compare
@@ -380,7 +388,7 @@ export class PlannerListComponent implements OnInit, AfterViewInit, AfterViewChe
     this.children = [];
     const t1 = performance.now();
     this.wiSubscriber = Observable.combineLatest(
-      this.store.select((iterations : AppState) => iterations.iterationState.iterations),
+      this.iterationService.getIterations(),
       // this.collaboratorService.getCollaborators(),
       this.workItemService.getWorkItemTypes(),
       this.areaService.getAreas(),

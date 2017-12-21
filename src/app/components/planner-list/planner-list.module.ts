@@ -1,5 +1,3 @@
-import { WorkItemDataService } from './../../services/work-item-data.service';
-import { EventService } from './../../services/event.service';
 import { NgModule }         from '@angular/core';
 import { CommonModule }     from '@angular/common';
 
@@ -47,6 +45,15 @@ import { MockHttp } from '../../mock/mock-http';
 import { HttpService } from '../../services/http-service';
 import { LabelService } from '../../services/label.service';
 import { AssigneesModule } from './../assignee/assignee.module';
+import { WorkItemDataService } from './../../services/work-item-data.service';
+import { EventService } from './../../services/event.service';
+
+// ngrx stuff
+import { StoreModule } from '@ngrx/store';
+import { EffectsModule } from '@ngrx/effects';
+import { IterationState, initialState as initialIterationState } from './../../states/iteration.state';
+import { iterationReducer } from './../../reducers/iteration-reducer';
+import { IterationEffects } from './../../effects/iteration.effects';
 
 let providers = [];
 
@@ -112,7 +119,15 @@ if (process.env.ENV == 'inmemory') {
     WorkItemDetailModule,
     WorkItemQuickAddModule,
     WorkItemDetailAddTypeSelectorModule,
-    PlannerModalModule
+    PlannerModalModule,
+    StoreModule.forFeature('listPage', {
+        iterations: iterationReducer
+      }, {
+      initialState: {
+        iterations: initialIterationState
+      }
+    }),
+    EffectsModule.forFeature([IterationEffects])
   ],
   declarations: [
     PlannerListComponent,
