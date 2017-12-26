@@ -1080,6 +1080,7 @@ export class PlannerListComponent implements OnInit, AfterViewChecked, OnDestroy
       if(col.display === true) return;
       col.selected = false;
       col.display = true;
+      col.showInDisplay = true;
       col.available = false;
     })
     this.columns = [...this.checkableColumn];
@@ -1092,6 +1093,7 @@ export class PlannerListComponent implements OnInit, AfterViewChecked, OnDestroy
       if(col.available === true) return;
       col.selected = false;
       col.display = false;
+      col.showInDisplay = false;
       col.available = true;
     });
     this.columns = [...this.checkableColumn];
