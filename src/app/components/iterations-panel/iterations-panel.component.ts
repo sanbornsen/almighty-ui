@@ -47,10 +47,6 @@ export class IterationComponent implements OnInit, OnDestroy, OnChanges {
   @ViewChild('modal') modal: FabPlannerIterationModalComponent;
   @ViewChild('treeList') treeList: TreeListComponent;
 
-  @Output()
-  public onSubmit = new EventEmitter();
-
-
 
   authUser: any = null;
   loggedIn: Boolean = true;
