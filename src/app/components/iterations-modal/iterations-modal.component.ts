@@ -342,16 +342,12 @@ export class FabPlannerIterationModalComponent implements OnInit, OnDestroy, OnC
           this.iteration.attributes.name.indexOf('\\') === -1 ) {
         this.validationError = false;
         if (this.modalType == 'create' || this.modalType == "createChild") {
-          this.iterationService.createIteration(this.iteration, this.selectedParentIteration)
-              .subscribe((iteration) => {
-                this.onSubmit.emit(iteration);
+          var newit = [this.iteration,this.selectedParentIteration];
+                console.log("####-5");
+                this.onSubmit.emit(newit);
                 this.resetValues();
                 this.createUpdateIterationDialog.close();
-          },
-          (e) => {
-            this.validationError = true;
-            console.log('Some error has occured', e);
-          });
+          
         } else {
           if (this.modalType == 'start') {
             this.iteration.attributes.state = 'start';

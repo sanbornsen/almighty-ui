@@ -4,8 +4,13 @@ import { PlannerBoardModule } from './app/components/planner-board/planner-board
 import { PlannerListModule } from './app/components/planner-list/planner-list.module';
 
 import { StoreModule } from '@ngrx/store';
-
 import { EffectsModule } from '@ngrx/effects';
+import { AppState } from './app/states/app.state';
+import { IterationState } from './app/states/iteration.state';
+import { iterationReducer } from './app/reducers/iteration-reducer';
+import { IterationEffects } from './app/effects/iteration.effects';
+
+
 
 @NgModule({
   imports: [StoreModule.forRoot({}),

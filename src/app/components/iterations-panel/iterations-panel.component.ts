@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs/Subscription';
 
 import { Params, ActivatedRoute } from '@angular/router';
 import { Component, OnInit, OnDestroy,
-  TemplateRef, Input, OnChanges, ViewChild, ViewEncapsulation } from '@angular/core';
+  TemplateRef, Input, OnChanges, ViewChild, ViewEncapsulation, Output, EventEmitter } from '@angular/core';
 
 import { Broadcaster, Logger, Notification, NotificationType, Notifications } from 'ngx-base';
 import { AuthenticationService } from 'ngx-login-client';
@@ -26,6 +26,10 @@ import {
   TreeListComponent,
   TreeListConfig
 } from 'patternfly-ng';
+
+import { Store } from '@ngrx/store';
+import { AppState } from 'src/app/states/app.state';
+import * as IterationActions from './../../actions/iteration.actions';
 
 @Component({
   encapsulation: ViewEncapsulation.None,
@@ -74,7 +78,8 @@ export class IterationComponent implements OnInit, OnDestroy, OnChanges {
     private route: ActivatedRoute,
     private spaces: Spaces,
     private workItemDataService: WorkItemDataService,
-    private workItemService: WorkItemService) {
+    private workItemService: WorkItemService,
+    private store: Store<AppState>) {
       let bag: any = this.dragulaService.find('wi-bag');
       this.dragulaEventListeners.push(
         this.dragulaService.drop
@@ -239,42 +244,24 @@ export class IterationComponent implements OnInit, OnDestroy, OnChanges {
   resolvedName(iteration: IterationModel) {
     return iteration.attributes.resolved_parent_path + '/' + iteration.attributes.name;
   }
-
   //This function is called after the iteration modal closes.
-  onCreateOrupdateIteration(iteration: IterationModel) {
-    let index = this.allIterations.findIndex((it) => it.id === iteration.id);
-    if (index >= 0) {
-      this.allIterations[index] = iteration;
-      //if iteration is a child iteration update that content
-      let parent = this.iterationService.getDirectParent(iteration, this.allIterations);
-      if( parent != undefined ) {
-        let parentIndex = this.allIterations.findIndex(i => i.id === parent.id);
-        let childIndex = this.allIterations[parentIndex].children.findIndex(child => child.id === iteration.id);
-        this.allIterations[parentIndex].children[childIndex] = iteration;
-      }
-    } else {
-      this.allIterations.splice(this.allIterations.length, 0, iteration);
-      //Check if the new iteration has a parent
-      if (!this.iterationService.isTopLevelIteration(iteration)) {
-        let parent = this.iterationService.getDirectParent(iteration, this.allIterations);
-        let parentIndex = this.allIterations.findIndex(i => i.id === parent.id);
-        if(!this.allIterations[parentIndex].children) {
-          this.allIterations[parentIndex].children = [];
-          this.allIterations[parentIndex].hasChildren = true;
-        }
-        this.allIterations[parentIndex].children.push(iteration);
-      }
-      let childIterations = this.iterationService.checkForChildIterations(iteration, this.allIterations);
-      if(childIterations.length > 0) {
-        this.allIterations[this.allIterations.length].hasChildren = true;
-        this.allIterations[this.allIterations.length].children = childIterations;
-      }
-    }
+  addIteration(iteration: IterationModel[]){
+    console.log("####-6");
+    var newIteration;
+    this.store.dispatch(new IterationActions.Add(iteration[0],iteration[1]));
+    this.store.select((newIt:AppState)=>newIt.listPage.iterations.iterations).subscribe((newIt)=>{console.log("log1"+newIt);this.allIterations=newIt});
+    console.log("####-7");
+    console.log(this.allIterations);
     this.treeIterations = this.iterationService.getTopLevelIterations(this.allIterations);
     this.treeList.update();
     this.clusterIterations();
-    this.iterationService.emitCreateIteration(iteration);
+    this.store.select((newIt:AppState)=>newIt.listPage.iterations.newIteration).subscribe((newIt)=>{console.log("log2"+newIt);newIteration=newIt});
+    console.log("####-8"+newIteration);
+    this.iterationService.emitCreateIteration(newIteration);
+
   }
+
+  
 
   getWorkItemsByIteration(iteration: IterationModel) {
     let filters: any = [];
