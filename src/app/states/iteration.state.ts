@@ -1,7 +1,11 @@
 import { IterationModel } from './../models/iteration.model';
 
 export interface IterationState {
-  [index: number]: IterationModel
+  iterations : IterationModel[];
+  newIteration : IterationModel;
 };
 
-export const initialState: IterationState = [] as IterationState;
+export const initialState: IterationState = {
+  iterations : [],
+  newIteration : null
+}
