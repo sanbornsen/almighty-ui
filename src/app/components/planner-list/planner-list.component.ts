@@ -59,7 +59,7 @@ import { WorkItemService } from '../../services/work-item.service';
 import { WorkItemDataService } from './../../services/work-item-data.service';
 import { CollaboratorService } from '../../services/collaborator.service';
 import { LabelService } from '../../services/label.service';
-import { LabelModel } from '../../models/label.model';
+import { LabelModel, LabelAttributes } from '../../models/label.model';
 import { UrlService } from './../../services/url.service';
 import { CookieService } from './../../services/cookie.service';
 import { WorkItemDetailAddTypeSelectorComponent } from './../work-item-create/work-item-create.component';
@@ -69,6 +69,7 @@ import { setTimeout } from 'core-js/library/web/timers';
 import { Store } from '@ngrx/store';
 import { AppState } from './../../states/app.state';
 import * as IterationActions from './../../actions/iteration.actions';
+import * as LabelActions from './../../actions/label.actions';
 
 @Component({
   encapsulation: ViewEncapsulation.None,
@@ -175,7 +176,8 @@ export class PlannerListComponent implements OnInit, AfterViewChecked, OnDestroy
     })
 
     this.store.dispatch(new IterationActions.Get());
-
+    this.store.dispatch(new LabelActions.Get());
+    // console.log(this.store.select((labels: AppState) => labels.listPage.labels), '####-4');
     // If there is an iteration on the URL
     // Setting the value to currentIteration
     // BehaviorSubject so that we can compare
