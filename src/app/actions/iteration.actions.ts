@@ -1,4 +1,5 @@
 import { Action } from '@ngrx/store';
+import { iterateListLike } from '@angular/core/src/change_detection/change_detection_util';
 
 export const ADD            = '[Iteration] Add';
 export const UPDATE         = '[Iteration] Update';
@@ -11,6 +12,11 @@ export const UPDATE_SUCCESS = '[Iteration] UpdateSuccess';
 export const UPDATE_ERROR   = '[Iteration] UpdateError';
 
 export class Add implements Action {
+  iteration ; parentIteration: any;
+  constructor(iteration: any, parentIteration: any){
+    this.iteration = iteration;
+    this.parentIteration = parentIteration;
+  }
   readonly type = ADD;
 }
 
@@ -35,6 +41,10 @@ export class GetError implements Action {
 }
 
 export class AddSuccess implements Action {
+  payload : any;
+  constructor(payload: any){
+    this.payload = payload;
+  };
   readonly type = ADD_SUCCESS;
 }
 

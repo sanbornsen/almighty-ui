@@ -13,8 +13,8 @@ import { IterationEffects } from './app/effects/iteration.effects';
 
 
 @NgModule({
-  imports: [StoreModule.forRoot({iterations : iterationReducer}),
-    EffectsModule.forRoot([IterationEffects])
+  imports: [StoreModule.forRoot({}),
+    EffectsModule.forRoot([])
   ],
   declarations: [
   ],
