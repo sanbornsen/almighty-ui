@@ -9,7 +9,6 @@ export type Action = IterationActions.All;
 
 export const iterationReducer : ActionReducer<IterationState> = ( state = initialState, action: Action) =>
 {
-    
     switch( action.type ) {
       case IterationActions.GET_SUCCESS:
       console.log('####-3', action);
@@ -17,6 +16,7 @@ export const iterationReducer : ActionReducer<IterationState> = ( state = initia
                iterations : action.payload,
                newIteration : state.newIteration
            }
+
 
       case IterationActions.GET_ERROR: 
             return state;
