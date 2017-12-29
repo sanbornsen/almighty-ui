@@ -52,7 +52,7 @@ import { EventService } from './../../services/event.service';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 import { IterationState, initialState as initialIterationState } from './../../states/iteration.state';
-import { iterationReducer } from './../../reducers/iteration-reducer';
+import { iterationReducer } from './../../reducers/iteration.reducer';
 import { IterationEffects } from './../../effects/iteration.effects';
 import { LabelState, initialState as initialLabelState } from './../../states/label.state';
 import { LabelReducer } from './../../reducers/label.reducer';
