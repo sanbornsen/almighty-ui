@@ -15,7 +15,6 @@ export class IterationEffects {
   @Effect() getIterations$ : Observable<Action> = this.actions$
     .ofType<IterationActions.Get>(IterationActions.GET)
     .switchMap(action => {
-      console.log('####-2', action);
       return this.iterationService.getIterations()
            .map(iterations => (new IterationActions.GetSuccess(iterations)))
            .catch(() => Observable.of(new IterationActions.GetError()))
