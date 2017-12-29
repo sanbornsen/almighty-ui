@@ -67,11 +67,6 @@ export const iterationReducer : ActionReducer<IterationState> = ( state = initia
       case IterationActions.ADD_ERROR:
              return state;
       
-      case IterationActions.UPDATE_SUCCESS:
-
-
-      case IterationActions.UPDATE_ERROR:
-
       default:
           return state;
     }

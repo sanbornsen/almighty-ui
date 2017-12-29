@@ -25,7 +25,17 @@ export class IterationEffects {
     .switchMap(action => {
       console.log('####-9', action);
       return this.iterationService.createIteration(action.iteration,action.parentIteration)
-           .map(iterations => (new IterationActions.AddSuccess(iterations)))
+           .map(iteration => (new IterationActions.AddSuccess(iteration)))
+           .catch(() => Observable.of(new IterationActions.AddError()))
+    });
+  
+  @Effect() updateIteration$ : Observable<Action> = this.actions$
+    .ofType<IterationActions.Update>(IterationActions.UPDATE)
+    .switchMap(action => {
+      console.log('####-', action);
+      return this.iterationService.updateIteration(action.iteration)
+           .map(iteration => (new IterationActions.AddSuccess(iteration)))
            .catch(() => Observable.of(new IterationActions.AddError()))
     });
 }
+

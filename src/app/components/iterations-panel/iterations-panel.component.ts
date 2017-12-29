@@ -249,16 +249,28 @@ export class IterationComponent implements OnInit, OnDestroy, OnChanges {
     console.log("####-6");
     var newIteration;
     this.store.dispatch(new IterationActions.Add(iteration[0],iteration[1]));
-    this.store.select((newIt:AppState)=>newIt.listPage.iterations.iterations).subscribe((newIt)=>{console.log("log1"+newIt);this.allIterations=newIt});
+    this.store.select((newIt:AppState)=> {return newIt.listPage.iterations.iterations}).subscribe((newIt)=>{console.log("log1"+newIt);this.allIterations=newIt});
     console.log("####-7");
     console.log(this.allIterations);
     this.treeIterations = this.iterationService.getTopLevelIterations(this.allIterations);
     this.treeList.update();
     this.clusterIterations();
-    this.store.select((newIt:AppState)=>newIt.listPage.iterations.newIteration).subscribe((newIt)=>{console.log("log2"+newIt);newIteration=newIt});
+    this.store.select((newIt:AppState)=> {return newIt.listPage.iterations.newIteration}).subscribe((newIt)=>{console.log("log2"+newIt);newIteration=newIt});
     console.log("####-8"+newIteration);
     this.iterationService.emitCreateIteration(newIteration);
 
+  }
+
+  updateIteration(iteration: IterationModel){
+    var newIteration;
+    this.store.dispatch(new IterationActions.Update(iteration));
+    this.store.select((newIt:AppState)=> {return newIt.listPage.iterations.iterations}).subscribe((newIt)=>{this.allIterations=newIt});
+    console.log(this.allIterations);
+    this.treeIterations = this.iterationService.getTopLevelIterations(this.allIterations);
+    this.treeList.update();
+    this.clusterIterations();
+    this.store.select((newIt:AppState)=> {return newIt.listPage.iterations.newIteration}).subscribe((newIt)=>{newIteration=newIt});
+    this.iterationService.emitCreateIteration(newIteration);
   }
 
   
