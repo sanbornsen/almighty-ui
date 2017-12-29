@@ -8,8 +8,6 @@ export const GET_SUCCESS    = '[Iteration] GetSuccess';
 export const GET_ERROR      = '[Iteration] GetError';
 export const ADD_SUCCESS    = '[Iteration] AddSuccess';
 export const ADD_ERROR      = '[Iteration] AddError';
-export const UPDATE_SUCCESS = '[Iteration] UpdateSuccess';
-export const UPDATE_ERROR   = '[Iteration] UpdateError';
 
 export class Add implements Action {
   iteration ; parentIteration: any;
@@ -21,6 +19,10 @@ export class Add implements Action {
 }
 
 export class Update implements Action {
+  iteration : any;
+  constructor(iteration : any){
+    this.iteration = iteration;
+  }
   readonly type = UPDATE;
 }
 
@@ -52,13 +54,6 @@ export class AddError implements Action {
   readonly type = ADD_ERROR;
 }
 
-export class UpdateSuccess implements Action {
-  readonly type = UPDATE_SUCCESS;
-}
-
-export class UpdateError implements Action {
-  readonly type = UPDATE_ERROR;
-}
 
 
 export type All
@@ -68,6 +63,4 @@ export type All
   | GetSuccess
   | GetError
   | AddSuccess
-  | AddError
-  | UpdateSuccess
-  | UpdateError;
+  | AddError;

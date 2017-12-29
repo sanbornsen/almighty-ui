@@ -25,7 +25,7 @@ import { TruncateModule } from 'ng2-truncate';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 import { IterationState, initialState as initialIterationState } from './../../states/iteration.state';
-import { iterationReducer } from './../../reducers/iteration-reducer';
+import { iterationReducer } from './../../reducers/iteration.reducer';
 import { IterationEffects } from './../../effects/iteration.effects';
 @NgModule({
   imports: [

@@ -25,6 +25,9 @@ export class FabPlannerIterationModalComponent implements OnInit, OnDestroy, OnC
   @Output()
   public onSubmit = new EventEmitter();
 
+  @Output()
+  public onUpdate = new EventEmitter();
+
   @ViewChild('createUpdateIterationDialog') createUpdateIterationDialog: any;
   @ViewChild('iterationSearch') iterationSearch: any;
   @ViewChild('iterationList') iterationList: any;
@@ -358,9 +361,7 @@ export class FabPlannerIterationModalComponent implements OnInit, OnDestroy, OnC
             // Not include state if it's just an update
             delete this.iteration.attributes.state;
           }
-          this.iterationService.updateIteration(this.iteration)
-            .subscribe((iteration) => {
-              this.onSubmit.emit(iteration);
+              this.onUpdate.emit(this.iteration);
               if (this.modalType == 'start') {
                 let toastIterationName = this.iteration.attributes.name;
                 if (toastIterationName.length > 15) {
@@ -375,13 +376,8 @@ export class FabPlannerIterationModalComponent implements OnInit, OnDestroy, OnC
               }
               this.resetValues();
               this.createUpdateIterationDialog.close();
-            },
-            (e) => {
-              this.spaceError = true;
-              // this.resetValues();
-              // console.log('Some error has occured', e.toString());
-            });
-        }
+            }
+        
       } else {
         this.validationError = true;
         this.validationString = '/ or \\ are not allowed in iteration name.';
