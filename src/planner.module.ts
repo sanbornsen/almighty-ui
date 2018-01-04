@@ -7,7 +7,7 @@ import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 import { AppState } from './app/states/app.state';
 import { IterationState } from './app/states/iteration.state';
-import { iterationReducer } from './app/reducers/iteration-reducer';
+import { iterationReducer } from './app/reducers/iteration.reducer';
 import { LabelReducer } from './app/reducers/label.reducer';
 import { AreaReducer } from './app/reducers/area.reducer';
 import { CollaboratorReducer } from './app/reducers/collaborator.reducer';
