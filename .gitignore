@@ -48,4 +48,9 @@ browser_logs.log
 #System Files
 .DS_Store
 Thumbs.db
+
 *.log
+
+
+package-lock.json
+runtime/package-lock.json
