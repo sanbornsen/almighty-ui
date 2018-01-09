@@ -65,7 +65,7 @@ export interface IterationUI extends modelUI {
   endAt: string;
   description: string;
   state: string;
-  links: string;
+  link: string;
   workItemCount: number;
   type: string;
 
@@ -81,24 +81,22 @@ export class IterationMapper {
 
    for(let i=0; i<iterations.length; i=i+1)
    {
-    
      this.iterationUI[i] = this._utilMapperUIModel(iterations[i]);
-    
    }
-
+   
    return this.iterationUI;
 
   }
 
   toServiceModel(iteration: IterationUI): IterationModel {
   
-   this.iterationModel = this._utilMapperBackendModel(iteration);
+   this.iterationModel = this._utilMapperServiceModel(iteration);
    return this.iterationModel;
 
   }
 
 
-  _utilMapperBackendModel(iteration: IterationUI): IterationModel {
+  _utilMapperServiceModel(iteration: IterationUI): IterationModel {
    
    let iterationModel: IterationModel;
    iterationModel.attributes = {
@@ -113,7 +111,7 @@ export class IterationMapper {
                                   resolved_parent_path: iteration.resolvedParentPath
                                 } as IterationAttributes;
    iterationModel.id = iteration.id;
-   iterationModel.links.self = iteration.links;
+   iterationModel.links.self = iteration.link;
    iterationModel.relationships.workitems.meta.total = iteration.workItemCount;
    iterationModel.type = iteration.type;
 
@@ -134,7 +132,7 @@ export class IterationMapper {
                      endAt: iterationModel.attributes.endAt,
                      description: iterationModel.attributes.description,
                      state: iterationModel.attributes.state,
-                     links: iterationModel.links.self,
+                     link: iterationModel.links.self,
                      workItemCount: iterationModel.relationships.workitems.meta.total,
                      type: iterationModel.type
                   } as IterationUI
