@@ -72,10 +72,8 @@ export interface IterationUI extends modelUI {
 }
 
 export class IterationMapper {
-iterations: IterationModel[];
-iteration: IterationModel;
+iterationModel: IterationModel;
 iterationsUI: IterationUI[];
-iterationUI: IterationUI;
 
 
 IterationModeltoIterationUI(iterations: IterationModel[]): IterationUI[] {
@@ -92,6 +90,14 @@ IterationModeltoIterationUI(iterations: IterationModel[]): IterationUI[] {
 }
 
 IterationUItoIterationModel(iteration: IterationUI): IterationModel {
+  
+  this.iterationModel = this._utilMapperBackendModel(iteration);
+  return this.iterationModel;
+
+}
+
+
+_utilMapperBackendModel(iteration: IterationUI): IterationModel {
    
    let iterationModel: IterationModel;
    iterationModel.attributes = {
