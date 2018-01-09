@@ -72,32 +72,33 @@ export interface IterationUI extends modelUI {
 }
 
 export class IterationMapper {
-iterationModel: IterationModel;
-iterationsUI: IterationUI[];
+
+  iterationModel: IterationModel;
+  iterationUI: IterationUI[];
 
 
-IterationModeltoIterationUI(iterations: IterationModel[]): IterationUI[] {
-  let i;
-  for(i=0;i<iterations.length;i=i+1)
-  {
+  toUIModel(iterations: IterationModel[]): IterationUI[] {
+
+   for(let i=0; i<iterations.length; i=i+1)
+   {
     
-    this.iterationsUI[i] = this._utilMapperUIModel(iterations[i]);
+     this.iterationUI[i] = this._utilMapperUIModel(iterations[i]);
     
+   }
+
+   return this.iterationUI;
+
   }
 
-  return this.iterationsUI;
-
-}
-
-IterationUItoIterationModel(iteration: IterationUI): IterationModel {
+  toServiceModel(iteration: IterationUI): IterationModel {
   
-  this.iterationModel = this._utilMapperBackendModel(iteration);
-  return this.iterationModel;
+   this.iterationModel = this._utilMapperBackendModel(iteration);
+   return this.iterationModel;
 
-}
+  }
 
 
-_utilMapperBackendModel(iteration: IterationUI): IterationModel {
+  _utilMapperBackendModel(iteration: IterationUI): IterationModel {
    
    let iterationModel: IterationModel;
    iterationModel.attributes = {
@@ -116,10 +117,10 @@ _utilMapperBackendModel(iteration: IterationUI): IterationModel {
    iterationModel.relationships.workitems.meta.total = iteration.workItemCount;
    iterationModel.type = iteration.type;
 
-  return iterationModel;
-}
+   return iterationModel;
+  }
 
-_utilMapperUIModel(iterationModel: IterationModel): IterationUI {
+  _utilMapperUIModel(iterationModel: IterationModel): IterationUI {
     
     let iterationUI: IterationUI;
     iterationUI = {
