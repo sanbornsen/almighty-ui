@@ -17,10 +17,10 @@ export class IterationEffects {
     .ofType<IterationActions.Get>(IterationActions.GET)
     .switchMap(action => {
       return this.iterationService.getIterations()
-           .do(iterations=>{ 
-                             let iterationMapper: IterationMapper;
-                             return iterationMapper.IterationModeltoIterationUI(iterations)
-                           }
+           .do(iterations=> { 
+                              let iterationMapper: IterationMapper;
+                              return iterationMapper.IterationModeltoIterationUI(iterations)
+                            }
             )
            .map(iterations => (new IterationActions.GetSuccess(iterations)))
            .catch(() => Observable.of(new IterationActions.GetError()))

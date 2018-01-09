@@ -67,6 +67,7 @@ export interface IterationUI extends modelUI {
   state: string;
   links: string;
   workItemCount: number;
+  type: string;
 
 }
 
@@ -78,7 +79,7 @@ iterationUI: IterationUI;
 
 
 IterationModeltoIterationUI(iterations: IterationModel[]): IterationUI[] {
-  var i;
+  let i;
   for(i=0;i<iterations.length;i=i+1)
   {
     
@@ -90,21 +91,46 @@ IterationModeltoIterationUI(iterations: IterationModel[]): IterationUI[] {
 
 }
 
+IterationUItoIterationModel(iteration: IterationUI): IterationModel {
+   
+   let iterationModel: IterationModel;
+   iterationModel.attributes = {
+                                  user_active: iteration.userActive,
+                                  active_status: iteration.activeStatus,
+                                  endAt: iteration.endAt,
+                                  startAt: iteration.startAt,
+                                  name: iteration.name,
+                                  state: iteration.state,
+                                  description: iteration.description,
+                                  parent_path: iteration.parentPath,
+                                  resolved_parent_path: iteration.resolvedParentPath
+                                } as IterationAttributes;
+   iterationModel.id = iteration.id;
+   iterationModel.links.self = iteration.links;
+   iterationModel.relationships.workitems.meta.total = iteration.workItemCount;
+   iterationModel.type = iteration.type;
+
+  return iterationModel;
+}
+
 _utilMapperUIModel(iterationModel: IterationModel): IterationUI {
     
     let iterationUI: IterationUI;
-    iterationUI.id = iterationModel.id;
-    iterationUI.name = iterationModel.attributes.name;
-    iterationUI.parentPath = iterationModel.attributes.parent_path;
-    iterationUI.resolvedParentPath = iterationModel.attributes.resolved_parent_path;
-    iterationUI.userActive = iterationModel.attributes.user_active;
-    iterationUI.activeStatus = iterationModel.attributes.active_status;
-    iterationUI.startAt = iterationModel.attributes.startAt;
-    iterationUI.endAt = iterationModel.attributes.endAt;
-    iterationUI.description = iterationModel.attributes.description;
-    iterationUI.state = iterationModel.attributes.state;
-    iterationUI.links = iterationModel.links.self;
-    iterationUI.workItemCount = iterationModel.relationships.workitems.meta.total;
+    iterationUI = {
+                     id: iterationModel.id,
+                     name: iterationModel.attributes.name,
+                     parentPath: iterationModel.attributes.parent_path,
+                     resolvedParentPath: iterationModel.attributes.resolved_parent_path,
+                     userActive: iterationModel.attributes.user_active,
+                     activeStatus: iterationModel.attributes.active_status,
+                     startAt: iterationModel.attributes.startAt,
+                     endAt: iterationModel.attributes.endAt,
+                     description: iterationModel.attributes.description,
+                     state: iterationModel.attributes.state,
+                     links: iterationModel.links.self,
+                     workItemCount: iterationModel.relationships.workitems.meta.total,
+                     type: iterationModel.type
+                  } as IterationUI
 
     return iterationUI; 
   }
