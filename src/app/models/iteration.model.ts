@@ -64,4 +64,49 @@ export interface IterationUI extends modelUI {
   startAt: string;
   endAt: string;
   description: string;
+  state: string;
+  links: string;
+  workItemCount: number;
+
+}
+
+export class IterationMapper {
+iterations: IterationModel[];
+iteration: IterationModel;
+iterationsUI: IterationUI[];
+iterationUI: IterationUI;
+
+
+IterationModeltoIterationUI(iterations: IterationModel[]): IterationUI[] {
+  var i;
+  for(i=0;i<iterations.length;i=i+1)
+  {
+    
+    this.iterationsUI[i] = this._utilMapperUIModel(iterations[i]);
+    
+  }
+
+  return this.iterationsUI;
+
+}
+
+_utilMapperUIModel(iterationModel: IterationModel): IterationUI {
+    
+    let iterationUI: IterationUI;
+    iterationUI.id = iterationModel.id;
+    iterationUI.name = iterationModel.attributes.name;
+    iterationUI.parentPath = iterationModel.attributes.parent_path;
+    iterationUI.resolvedParentPath = iterationModel.attributes.resolved_parent_path;
+    iterationUI.userActive = iterationModel.attributes.user_active;
+    iterationUI.activeStatus = iterationModel.attributes.active_status;
+    iterationUI.startAt = iterationModel.attributes.startAt;
+    iterationUI.endAt = iterationModel.attributes.endAt;
+    iterationUI.description = iterationModel.attributes.description;
+    iterationUI.state = iterationModel.attributes.state;
+    iterationUI.links = iterationModel.links.self;
+    iterationUI.workItemCount = iterationModel.relationships.workitems.meta.total;
+
+    return iterationUI; 
+  }
+
 }
