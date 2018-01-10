@@ -1,9 +1,11 @@
 import { Injectable } from "@angular/core";
 import { Actions, Effect } from "@ngrx/effects";
 import { Observable } from "rxjs";
-import * as IterationActions from ".././actions/iteration.actions";
-import { IterationService } from '.././services/iteration.service';
-import { Action } from '@ngrx/store';
+import * as IterationActions from "./../actions/iteration.actions";
+import { IterationService } from "./../services/iteration.service";
+import { IterationMapper } from "./../models/iteration.model";
+
+export type Action = IterationActions.All;
 
 @Injectable()
 export class IterationEffects {
@@ -12,10 +14,11 @@ export class IterationEffects {
   }
 
   @Effect() getIterations$ : Observable<Action> = this.actions$
-    .ofType(IterationActions.GET)
+    .ofType<IterationActions.Get>(IterationActions.GET)
     .switchMap(action => {
       return this.iterationService.getIterations()
-           .map(iterations => (new IterationActions.GetSuccess(iterations)))
-           .catch(() => Observable.of(new IterationActions.GetError()))
+       .do(iterations => { return new IterationMapper().toUIModel(iterations); })
+       .map(iterations => (new IterationActions.GetSuccess(iterations)))
+       .catch(() => Observable.of(new IterationActions.GetError()))
     });
 }
