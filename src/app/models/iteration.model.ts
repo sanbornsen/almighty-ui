@@ -68,7 +68,6 @@ export interface IterationUI extends modelUI {
   link: string;
   workItemCount: number;
   type: string;
-
 }
 
 export class IterationMapper {
@@ -76,31 +75,21 @@ export class IterationMapper {
   iterationModel: IterationModel;
   iterationUI: IterationUI[];
 
-
   toUIModel(iterations: IterationModel[]): IterationUI[] {
-
-   for(let i=0; i<iterations.length; i=i+1)
-   {
+    for(let i = 0; i < iterations.length; i = i + 1) {
      this.iterationUI[i] = this._utilMapperUIModel(iterations[i]);
-   }
-   
-   return this.iterationUI;
-
+    }
+    return this.iterationUI;
   }
 
   toServiceModel(iteration: IterationUI): IterationModel {
-  
-   this.iterationModel = this._utilMapperServiceModel(iteration);
-   return this.iterationModel;
-
+    this.iterationModel = this._utilMapperServiceModel(iteration);
+    return this.iterationModel;
   }
 
-
   _utilMapperServiceModel(iteration: IterationUI): IterationModel {
-   
-   let iterationModel: IterationModel;
-   iterationModel.attributes = {
-                                  user_active: iteration.userActive,
+    let iterationModel: IterationModel;
+    iterationModel.attributes = { user_active: iteration.userActive,
                                   active_status: iteration.activeStatus,
                                   endAt: iteration.endAt,
                                   startAt: iteration.startAt,
@@ -110,34 +99,29 @@ export class IterationMapper {
                                   parent_path: iteration.parentPath,
                                   resolved_parent_path: iteration.resolvedParentPath
                                 } as IterationAttributes;
-   iterationModel.id = iteration.id;
-   iterationModel.links.self = iteration.link;
-   iterationModel.relationships.workitems.meta.total = iteration.workItemCount;
-   iterationModel.type = iteration.type;
-
-   return iterationModel;
+    iterationModel.id = iteration.id;
+    iterationModel.links.self = iteration.link;
+    iterationModel.relationships.workitems.meta.total = iteration.workItemCount;
+    iterationModel.type = iteration.type;
+    return iterationModel;
   }
 
   _utilMapperUIModel(iterationModel: IterationModel): IterationUI {
-    
     let iterationUI: IterationUI;
-    iterationUI = {
-                     id: iterationModel.id,
-                     name: iterationModel.attributes.name,
-                     parentPath: iterationModel.attributes.parent_path,
-                     resolvedParentPath: iterationModel.attributes.resolved_parent_path,
-                     userActive: iterationModel.attributes.user_active,
-                     activeStatus: iterationModel.attributes.active_status,
-                     startAt: iterationModel.attributes.startAt,
-                     endAt: iterationModel.attributes.endAt,
-                     description: iterationModel.attributes.description,
-                     state: iterationModel.attributes.state,
-                     link: iterationModel.links.self,
-                     workItemCount: iterationModel.relationships.workitems.meta.total,
-                     type: iterationModel.type
+    iterationUI = { id: iterationModel.id,
+                    name: iterationModel.attributes.name,
+                    parentPath: iterationModel.attributes.parent_path,
+                    resolvedParentPath: iterationModel.attributes.resolved_parent_path,
+                    userActive: iterationModel.attributes.user_active,
+                    activeStatus: iterationModel.attributes.active_status,
+                    startAt: iterationModel.attributes.startAt,
+                    endAt: iterationModel.attributes.endAt,
+                    description: iterationModel.attributes.description,
+                    state: iterationModel.attributes.state,
+                    link: iterationModel.links.self,
+                    workItemCount: iterationModel.relationships.workitems.meta.total,
+                    type: iterationModel.type
                   } as IterationUI
-
     return iterationUI; 
   }
-
 }
