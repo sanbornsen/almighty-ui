@@ -7,7 +7,8 @@ module.exports = function(config) {
             { pattern: "src/base.spec.ts" },
             { pattern: "src/app/mock/**/*.+(ts|html)" },
             { pattern: "src/app/pipes/**/*.+(ts|html)" },
-            { pattern: "src/app/services/**/*.+(ts|html)" }
+            { pattern: "src/app/services/**/*.+(ts|html)" },
+            { pattern: "src/app/models/**/*.+(ts|html)" }
         ],
 
         plugins: [
