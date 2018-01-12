@@ -1,4 +1,9 @@
-import { modelUI } from './common.model';
+import {
+  modelUI,
+  Mapper,
+  MapTree,
+  switchModel
+} from './common.model';
 
 export class IterationModel {
   attributes?: IterationAttributes;
@@ -56,6 +61,8 @@ export class IterationRelations {
   };
 }
 
+export interface IterationService extends IterationModel {}
+
 export interface IterationUI extends modelUI {
   parentPath: string;
   resolvedParentPath: string;
@@ -70,58 +77,101 @@ export interface IterationUI extends modelUI {
   type: string;
 }
 
-export class IterationMapper {
-
-  iterationModel: IterationModel;
-  iterationUI: IterationUI[];
-
-  toUIModel(iterations: IterationModel[]): IterationUI[] {
-    for(let i = 0; i < iterations.length; i = i + 1) {
-     this.iterationUI[i] = this._utilMapperUIModel(iterations[i]);
+export class IterationMapper implements Mapper<IterationModel, IterationUI> {
+  
+  serviceToUiMapTree: MapTree = [{
+      fromPath: ['id'],
+      toPath: ['id']
+    }, {
+      fromPath: ['attributes','name'],
+      toPath: ['name']
+    }, {
+      fromPath: ['attributes','parent_path'],
+      toPath: ['parentPath']
+    }, {
+      fromPath: ['attributes','resolved_parent_path'],
+      toPath: ['resolvedParentPath']
+    }, {
+      fromPath: ['attributes','user_active'],
+      toPath: ['userActive']
+    }, {
+      fromPath: ['attributes','active_status'],
+      toPath: ['activeStatus']
+    }, {
+      fromPath: ['attributes','startAt'],
+      toPath: ['startAt']
+    }, {
+      fromPath: ['attributes','endAt'],
+      toPath: ['endAt']
+    }, {
+      fromPath: ['attributes','description'],
+      toPath: ['description']
+    }, {
+      fromPath: ['attributes','state'],
+      toPath: ['state']
+    }, {
+      fromPath: ['links','self'],
+      toPath: ['link']
+    }, {
+      fromPath: ['relationships','workitems','meta','total'],
+      toPath: ['workItemCount']
+    }, {
+      fromPath: ['type'],
+      toPath: ['type']
     }
-    return this.iterationUI;
+  ];
+
+  uiToServiceMapTree: MapTree = [{
+      toPath: ['id'],
+      fromPath: ['id']
+    }, {
+      toPath: ['attributes','name'],
+      fromPath: ['name']
+    }, {
+      toPath: ['attributes','parent_path'],
+      fromPath: ['parentPath']
+    }, {
+      toPath: ['attributes','resolved_parent_path'],
+      fromPath: ['resolvedParentPath']
+    }, {
+      toPath: ['attributes','user_active'],
+      fromPath: ['userActive']
+    }, {
+      toPath: ['attributes','active_status'],
+      fromPath: ['activeStatus']
+    }, {
+      toPath: ['attributes','startAt'],
+      fromPath: ['startAt']
+    }, {
+      toPath: ['attributes','endAt'],
+      fromPath: ['endAt']
+    }, {
+      toPath: ['attributes','description'],
+      fromPath: ['description']
+    }, {
+      toPath: ['attributes','state'],
+      fromPath: ['state']
+    }, {
+      toPath: ['links','self'],
+      fromPath: ['link']
+    }, {
+      toPath: ['relationships','workitems','meta','total'],
+      fromPath: ['workItemCount']
+    }, {
+      toPath: ['type'],
+      fromPath: ['type']
+    }
+  ];
+
+  toUIModel(arg: IterationService): IterationUI {
+    return switchModel<IterationService, IterationUI>(
+      arg, this.serviceToUiMapTree
+    )
   }
 
-  toServiceModel(iteration: IterationUI): IterationModel {
-    this.iterationModel = this._utilMapperServiceModel(iteration);
-    return this.iterationModel;
-  }
-
-  _utilMapperServiceModel(iteration: IterationUI): IterationModel {
-    let iterationModel: IterationModel;
-    iterationModel.attributes = { user_active: iteration.userActive,
-                                  active_status: iteration.activeStatus,
-                                  endAt: iteration.endAt,
-                                  startAt: iteration.startAt,
-                                  name: iteration.name,
-                                  state: iteration.state,
-                                  description: iteration.description,
-                                  parent_path: iteration.parentPath,
-                                  resolved_parent_path: iteration.resolvedParentPath
-                                } as IterationAttributes;
-    iterationModel.id = iteration.id;
-    iterationModel.links.self = iteration.link;
-    iterationModel.relationships.workitems.meta.total = iteration.workItemCount;
-    iterationModel.type = iteration.type;
-    return iterationModel;
-  }
-
-  _utilMapperUIModel(iterationModel: IterationModel): IterationUI {
-    let iterationUI: IterationUI;
-    iterationUI = { id: iterationModel.id,
-                    name: iterationModel.attributes.name,
-                    parentPath: iterationModel.attributes.parent_path,
-                    resolvedParentPath: iterationModel.attributes.resolved_parent_path,
-                    userActive: iterationModel.attributes.user_active,
-                    activeStatus: iterationModel.attributes.active_status,
-                    startAt: iterationModel.attributes.startAt,
-                    endAt: iterationModel.attributes.endAt,
-                    description: iterationModel.attributes.description,
-                    state: iterationModel.attributes.state,
-                    link: iterationModel.links.self,
-                    workItemCount: iterationModel.relationships.workitems.meta.total,
-                    type: iterationModel.type
-                  } as IterationUI
-    return iterationUI; 
+  toServiceModel(arg: IterationUI): IterationService {
+    return switchModel<IterationService, IterationUI>(
+      arg, this.uiToServiceMapTree
+    )
   }
 }
