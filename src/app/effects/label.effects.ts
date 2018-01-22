@@ -30,11 +30,10 @@ export class LabelEffects {
 
   @Effect() createLabel$ = this.actions$
     .ofType<LabelActions.Add>(LabelActions.ADD)
-    .map(action => action.payload)
-    .do(payload => {
-      this.labelService.createLabel(payload)
-        .subscribe(label => {
-          this.store.dispatch(new LabelActions.AddSuccess(label));
-        })
+    .switchMap(action => {
+      const lMapper = new LabelMapper();
+      return this.labelService.createLabel(lMapper.toServiceModel(action.payload))
+      .map(label => (new LabelActions.AddSuccess(lMapper.toUIModel(label))))
+      .catch(() => Observable.of(new LabelActions.AddError()))
     })
 }
