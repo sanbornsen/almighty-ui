@@ -22,6 +22,11 @@ import { ModalModule } from 'ngx-modal';
 import { TooltipConfig, TooltipModule } from 'ngx-bootstrap/tooltip';
 import { TruncateModule } from 'ng2-truncate';
 
+// ngrx stuff
+import { StoreModule } from '@ngrx/store';
+import { iterationUiReducer } from './../../reducers/iteration-reducer';
+import { initialUIState } from './../../states/iteration.state';
+
 @NgModule({
   imports: [
     ActionModule,
@@ -40,6 +45,13 @@ import { TruncateModule } from 'ng2-truncate';
     RouterModule,
     // TreeModule
     // TreeListModule
+    StoreModule.forFeature('iterationPanel', {
+      iterationUI: iterationUiReducer
+    }, {
+      initialState: {
+        iterationUI: initialUIState
+      }
+    })
   ],
   declarations: [
     FabPlannerIterationModalComponent,

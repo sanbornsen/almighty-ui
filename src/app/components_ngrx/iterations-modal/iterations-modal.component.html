@@ -15,7 +15,7 @@
               id="iteration-name"
               type="text" class="form-control"
               placeholder="Iteration Name"
-              [(ngModel)]="iteration.attributes.name"
+              [(ngModel)]="iteration.name"
               (keyup)="removeError()">
             <span class="error-block">
               <span class="help-block" id="iteration-help-label">{{validationString}}</span>
@@ -44,7 +44,7 @@
             placeholder="Describe this iteration's goals and what it will include."
             id="iteration-description"
             rows="3"
-            [(ngModel)]="iteration.attributes.description">
+            [(ngModel)]="iteration.description">
           </textarea>
         </div>
       </div>
@@ -68,7 +68,7 @@
       <div *ngIf="modalType=='create' || modalType=='update' || modalType=='createChild'">
         <label class="f8-active-label">Force Active: </label>
         <!--
-          <switch (onChecked)="onChecked($event)" [isChecked]="iteration.attributes.user_active" id="active-switch"></switch>
+          <switch (onChecked)="onChecked($event)" [isChecked]="iteration.userActive" id="active-switch"></switch>
         -->
       </div>
       <div *ngIf="modalType=='close'"
