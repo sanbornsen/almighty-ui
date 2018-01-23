@@ -27,7 +27,7 @@ import {
 // ngrx stuff
 import { Store } from '@ngrx/store';
 import { AppState } from './../../states/app.state';
-import { IterationState } from './../../states/iteration.state';
+import { IterationState, IterationUIState } from './../../states/iteration.state';
 
 @Component({
   encapsulation: ViewEncapsulation.None,
@@ -195,6 +195,16 @@ export class IterationComponent implements OnInit, OnDestroy, OnChanges {
           console.log('Some error has occured', e);
         });
     }
+
+    this.store
+        .select('iterationPanel')
+        .select('iterationUI')
+        .subscribe((val) => {
+          console.log('####-1', val);
+        },
+        (e) => {
+          console.log('Some error has occured', e);
+        });
   }
 
   clusterIterations() {

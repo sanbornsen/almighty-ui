@@ -46,14 +46,23 @@ export const iterationUiReducer: ActionReducer<IterationUIState> =
   ( state = initialUIState, action: Action) => {
     switch( action.type ) {
       case IterationActions.ADD_SUCCESS:
-        state.loading = false;
-        return state;
+        return {
+          loading: false,
+          error: '',
+          success: ''
+        };
       case IterationActions.ADD_ERROR:
-        state.loading = false;
-        return state;
+        return {
+          loading: false,
+          error: '',
+          success: ''
+        };
       case IterationActions.ADD:
-        state.loading = true;
-        return state;
+        return {
+          loading: true,
+          error: '',
+          success: ''
+        };
       default:
         return state;
     }
