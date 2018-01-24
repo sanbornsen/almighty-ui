@@ -49,6 +49,7 @@ export class FabPlannerIterationModalComponent implements OnInit, OnDestroy, OnC
   private endDate: any;
   private spaceError: Boolean = false;
   private iterationName: string;
+  private submitLoading: boolean = false;
   iterations: IterationUI[] = [];
   iterationsValue: any = [];
   filteredIterations: any = [];
@@ -56,7 +57,7 @@ export class FabPlannerIterationModalComponent implements OnInit, OnDestroy, OnC
   selectedParentIterationName:string = '';
   iterationSearchDisable: Boolean = false;
   showIterationDropdown: Boolean = false;
-  validationString: string = 'Something went wrong.'
+  validationString: string = 'Something went wrong.';
 
   private startDatePickerOptions: IMyOptions = {
     dateFormat: 'dd mmm yyyy',
@@ -83,6 +84,18 @@ export class FabPlannerIterationModalComponent implements OnInit, OnDestroy, OnC
 
   ngOnInit() {
     this.resetValues();
+    this.store
+        .select('iterationPanel')
+        .select('iterationUI')
+        .subscribe((uiState) => {
+          if (this.submitLoading && !uiState.modalLoading) {
+            this.createUpdateIterationDialog.close();
+          }
+          this.submitLoading = uiState.modalLoading;
+        },
+        (e) => {
+          console.log('Some error has occured', e);
+        });
   }
 
   resetValues() {
@@ -92,8 +105,8 @@ export class FabPlannerIterationModalComponent implements OnInit, OnDestroy, OnC
       name: '',
       userActive: false,
       isActive: false,
-      startAt: '',
-      endAt: '',
+      startAt: null,
+      endAt: null,
       description: '',
       state: 'new',
       workItemTotalCount: 0,
@@ -330,16 +343,6 @@ export class FabPlannerIterationModalComponent implements OnInit, OnDestroy, OnC
             iteration: this.iteration,
             parent: this.selectedParentIteration
           }));
-          // this.iterationService.createIteration(this.iteration, this.selectedParentIteration)
-          //     .subscribe((iteration) => {
-          //       this.onSubmit.emit(iteration);
-          //       this.resetValues();
-          //       this.createUpdateIterationDialog.close();
-          // },
-          // (e) => {
-          //   this.validationError = true;
-          //   console.log('Some error has occured', e);
-          // });
         } else {
           if (this.modalType == 'start') {
             this.iteration.state = 'start';
@@ -350,10 +353,12 @@ export class FabPlannerIterationModalComponent implements OnInit, OnDestroy, OnC
             // Not include state if it's just an update
             delete this.iteration.state;
           }
+          console.log('####-1', this.iteration);
+          this.store.dispatch(new IterationActions.Update(this.iteration));
           // this.iterationService.updateIteration(this.iteration)
           //   .subscribe((iteration) => {
           //     this.onSubmit.emit(iteration);
-          //     if (this.modalType == 'start') {
+          //     if (this.modalType == 'start')
           //       let toastIterationName = this.iteration.attributes.name;
           //       if (toastIterationName.length > 15) {
           //         toastIterationName = toastIterationName.slice(0, 15) + '...';

@@ -196,15 +196,15 @@ export class IterationComponent implements OnInit, OnDestroy, OnChanges {
         });
     }
 
-    this.store
-        .select('iterationPanel')
-        .select('iterationUI')
-        .subscribe((val) => {
-          console.log('####-1', val);
-        },
-        (e) => {
-          console.log('Some error has occured', e);
-        });
+    // this.store
+    //     .select('iterationPanel')
+    //     .select('iterationUI')
+    //     .subscribe((val) => {
+    //       console.log('####-1', val);
+    //     },
+    //     (e) => {
+    //       console.log('Some error has occured', e);
+    //     });
   }
 
   clusterIterations() {

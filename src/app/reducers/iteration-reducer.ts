@@ -1,3 +1,4 @@
+import { cloneDeep } from 'lodash';
 import * as IterationActions from '.././actions/iteration.actions';
 import { State } from '@ngrx/store';
 import { IterationModel } from './../models/iteration.model';
@@ -12,7 +13,7 @@ import {
 export type Action = IterationActions.All;
 
 
-export const iterationReducer : ActionReducer<IterationState> =
+export const iterationReducer: ActionReducer<IterationState> =
   ( state = initialState, action: Action) => {
     switch( action.type ) {
       case IterationActions.GET_SUCCESS:
@@ -23,17 +24,27 @@ export const iterationReducer : ActionReducer<IterationState> =
         const newIteration = action.payload.iteration;
         if (parent) {
           const parentIndex = state.findIndex(i => i.id === parent.id);
-          if (parentIndex) {
+          if (parentIndex > -1) {
             state[parentIndex].hasChildren = true;
           }
         }
         return [ action.payload.iteration, ...state ];
 
+      case IterationActions.UPDATE_SUCCESS:
+        const updatedIteration = action.payload;
+        const index = state.findIndex(i => i.id === updatedIteration.id);
+        if (index > -1) {
+          return [
+            ...state.slice(0, index),
+            updatedIteration,
+            ...state.slice(index + 1)
+          ]
+        }
+        return state;
+
       case IterationActions.GET_ERROR:
 
       case IterationActions.ADD_ERROR:
-
-      case IterationActions.UPDATE_SUCCESS:
 
       case IterationActions.UPDATE_ERROR:
 
@@ -44,26 +55,24 @@ export const iterationReducer : ActionReducer<IterationState> =
 
 export const iterationUiReducer: ActionReducer<IterationUIState> =
   ( state = initialUIState, action: Action) => {
+    const newState = cloneDeep(state);
     switch( action.type ) {
+      case IterationActions.UPDATE_SUCCESS:
       case IterationActions.ADD_SUCCESS:
-        return {
-          loading: false,
-          error: '',
-          success: ''
-        };
+        newState.modalLoading = false;
+        return newState;
+
+      case IterationActions.UPDATE_ERROR:
       case IterationActions.ADD_ERROR:
-        return {
-          loading: false,
-          error: '',
-          success: ''
-        };
+        newState.modalLoading = false;
+        return newState;
+
+      case IterationActions.UPDATE:
       case IterationActions.ADD:
-        return {
-          loading: true,
-          error: '',
-          success: ''
-        };
+        newState.modalLoading = true;
+        return newState;
+
       default:
-        return state;
+        return newState;
     }
   }

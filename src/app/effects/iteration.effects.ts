@@ -1,3 +1,4 @@
+import { Update } from './../actions/iteration.actions';
 import { Injectable } from "@angular/core";
 import { Actions, Effect } from "@ngrx/effects";
 import { Observable } from "rxjs";
@@ -39,6 +40,21 @@ export class IterationEffects {
        .map(iteration => new IterationActions.AddSuccess({
          iteration, parent: parent ? itMapper.toUIModel(parent) : null
         }))
+       .catch(() => Observable.of(new IterationActions.AddError()))
+    })
+
+  @Effect() updateIteration$: Observable<Action> = this.actions$
+    .ofType(IterationActions.UPDATE)
+    .switchMap((action: IterationActions.Update) => {
+      const itMapper = new IterationMapper();
+      const iteration = itMapper.toServiceModel(action.payload);
+      console.log('####-2', iteration);
+      return this.iterationService.updateIteration(iteration)
+        .map(iteration => {
+          console.log('####-3', iteration);
+          return itMapper.toUIModel(iteration);
+        })
+       .map(iteration => new IterationActions.UpdateSuccess(iteration))
        .catch(() => Observable.of(new IterationActions.AddError()))
     })
 }

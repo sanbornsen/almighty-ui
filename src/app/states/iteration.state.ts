@@ -5,13 +5,13 @@ export type IterationState = IterationUI[];
 export const initialState: IterationState = [] as IterationState;
 
 export interface IterationUIState {
-  loading: boolean;
+  modalLoading: boolean;
   error: string;
   success: string;
 }
 
 export const initialUIState: IterationUIState = {
-  loading: false,
+  modalLoading: false,
   error: '',
   success: ''
 }
