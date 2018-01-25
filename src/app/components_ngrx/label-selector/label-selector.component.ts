@@ -40,11 +40,11 @@ export class LabelSelectorComponent implements OnInit, OnChanges {
   @Output() onCloseSelector: EventEmitter<LabelUI[]> = new EventEmitter();
 
   private activeAddLabel: boolean = false;
-  private backup: any[] = [];
+  //private backup: any[] = [];
   private colorPickerActive: boolean = false;
   private colors: any[] = [];
   private createDisabled: boolean = false;
-  private labels: any[] = [];
+  private labels: LabelUI[] = [];
   private newSelectedColor: any = {};
   private searchValue: string = '';
 
@@ -77,21 +77,12 @@ export class LabelSelectorComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges) {
     if( changes.allLabels ) {
-      this.backup = cloneDeep(this.allLabels.map((label: LabelUI) => {
-        return {
-          id: label.id,
-          color: label.backgroundColor,
-          border: label.borderColor,
-          name: label.name,
-          selected: false
-        }
-      }));
       if (this.searchValue.length) {
         this.labels =
-          cloneDeep(this.backup.filter(i => i.name.indexOf(this.searchValue) > - 1));
+          cloneDeep(this.allLabels.filter(i => i.name.indexOf(this.searchValue) > - 1));
       }
       else {
-        this.labels = cloneDeep(this.backup);
+        this.labels = cloneDeep(this.allLabels);
       }
     }
     if( changes.selectedLabels ) {
@@ -122,11 +113,12 @@ export class LabelSelectorComponent implements OnInit, OnChanges {
         this.labels[index].selected = false;
       }
     });
-    this.backup.forEach((label, index) => {
+
+    this.allLabels.forEach((label, index) => {
       if (this.selectedLabels.find(l => label.id === l.id)) {
-        this.backup[index].selected = true;
+        this.allLabels[index].selected = true;
       } else {
-        this.backup[index].selected = false;
+        this.allLabels[index].selected = false;
       }
     });
   }
@@ -135,9 +127,9 @@ export class LabelSelectorComponent implements OnInit, OnChanges {
     let needle = event.trim();
     this.searchValue = needle;
     if (needle.length) {
-      this.labels = cloneDeep(this.backup.filter(i => i.name.indexOf(needle) > -1));
+      this.labels = cloneDeep(this.allLabels.filter(i => i.name.indexOf(needle) > -1));
     } else {
-      this.labels = cloneDeep(this.backup);
+      this.labels = cloneDeep(this.allLabels);
     }
   }
 
@@ -175,27 +167,16 @@ export class LabelSelectorComponent implements OnInit, OnChanges {
     this.createDisabled = false;
     this.newSelectedColor = this.colors[Math.floor(Math.random()*this.colors.length)];
     let nl = this.allLabels.find(newLabel => newLabel.name === labelPayload.name)
-    const newLabel = {
-      id: nl.id,
-      color: nl.backgroundColor,
-      border: nl.borderColor,
-      name: nl.name,
-      selected: false
-    };
-
         // Emit new label
         // TODO: Should be replaced by ngrx/store
-        //this.eventService.labelAdd.next(data);
-    this.backup = [cloneDeep(newLabel), ...this.backup];
-    if (this.searchValue === '' || (this.searchValue !== '' && name.indexOf(this.searchValue) > - 1)) 
+    if (this.searchValue === '' || (this.searchValue !== '' && nl.name.indexOf(this.searchValue) > - 1)) 
     {
-      this.labels = [cloneDeep(newLabel), ...this.labels];
+      this.labels = [cloneDeep(nl), ...this.labels];
     }
     this.labelnameInput.nativeElement.value = '';
     this.labelnameInput.nativeElement.focus();
   }
-
-
+  
   onOpen(event) {
     this.onOpenSelector.emit('open');
   }
