@@ -78,6 +78,7 @@ export interface IterationUI extends modelUI {
   children: IterationUI[];
   hasChildren?: boolean;
   parentId?: string; // relationships / parent / data / id
+  type: string;
 }
 
 export class IterationMapper implements Mapper<IterationModel, IterationUI> {
@@ -127,6 +128,9 @@ export class IterationMapper implements Mapper<IterationModel, IterationUI> {
     }, {
       fromPath: ['relationships', 'parent', 'data', 'id'],
       toPath: ['parentId']
+    }, {
+      toPath: ['type'],
+      toValue: 'iterations'
     }
 
   ];
