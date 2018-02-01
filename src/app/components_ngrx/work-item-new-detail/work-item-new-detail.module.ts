@@ -35,6 +35,14 @@ import { SelectDropdownModule } from './../../widgets/select-dropdown/select-dro
 import { AssigneesModule } from './../assignee/assignee.module';
 import { AssigneeSelectorModule } from './../assignee-selector/assignee-selector.module';
 
+//ngrx stuff
+import { StoreModule } from '@ngrx/store';
+import { EffectsModule } from '@ngrx/effects';
+import { CommentState, initialState as initialCommentState } from './../../states/comment.state';
+import { CommentReducer } from './../../reducers/comment.reducer';
+import { CommentEffects } from './../../effects/comment.effects';
+
+
 let providers = [];
 
 if (process.env.ENV == 'inmemory') {
@@ -99,7 +107,15 @@ if (process.env.ENV == 'inmemory') {
     InlineInputModule,
     SelectDropdownModule,
     WorkItemCommentModule,
-    PlannerModalModule
+    PlannerModalModule,
+    StoreModule.forFeature('detailPage', {
+      comments: CommentReducer
+    }, {
+      initialState: {
+        comments: initialCommentState
+      }
+    }),
+    EffectsModule.forFeature([CommentEffects])
   ],
   declarations: [
     WorkItemNewDetailComponent

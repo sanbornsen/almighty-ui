@@ -25,19 +25,19 @@ import { cloneDeep, merge, remove } from 'lodash';
 import { Spaces } from 'ngx-fabric8-wit';
 import { Observable } from 'rxjs';
 
-import { AreaModel } from './../../models/area.model';
+import { AreaModel, AreaUI } from './../../models/area.model';
 import { AreaService } from './../../services/area.service';
-import { Comment } from './../../models/comment';
-import { IterationModel } from './../../models/iteration.model';
+import { Comment, CommentUI } from './../../models/comment';
+import { IterationModel, IterationUI } from './../../models/iteration.model';
 import { IterationService } from './../../services/iteration.service';
-import { LabelModel } from './../../models/label.model';
+import { LabelModel, LabelUI } from './../../models/label.model';
 import { LabelService } from './../../services/label.service';
 import { WorkItemTypeControlService } from './../../services/work-item-type-control.service';
 import { TypeaheadDropdown, TypeaheadDropdownValue } from '../typeahead-dropdown/typeahead-dropdown.component';
 import { WorkItemDataService } from './../../services/work-item-data.service';
 import { ModalService } from '../../services/modal.service';
 import { UrlService } from './../../services/url.service';
-import { WorkItem, WorkItemRelations } from './../../models/work-item';
+import { WorkItem, WorkItemRelations, WorkItemUI } from './../../models/work-item';
 import { WorkItemService } from './../../services/work-item.service';
 import { CollaboratorService } from '../../services/collaborator.service'
 import { AuthenticationService,
@@ -50,6 +50,10 @@ import {
   SelectDropdownComponent
 } from './../../widgets/select-dropdown/select-dropdown.component';
 
+//ngrx stuff
+import { Store } from '@ngrx/store';
+import { AppState } from './../../states/app.state';
+import * as CommentActions from './../../actions/comment.actions';
 
 @Component({
   selector: 'work-item-new-detail',
@@ -80,9 +84,9 @@ export class WorkItemNewDetailComponent implements OnInit, OnDestroy, AfterViewC
   dynamicFormGroup: FormGroup;
   dynamicFormDataArray: any;
   iterations: TypeaheadDropdownValue[] = [];
-  workItem: WorkItem;
+  workItem: WorkItemUI;
   workItemRef: WorkItem;
-  workItemPayload: WorkItem;
+  //workItemPayload: WorkItem;
   eventListeners: any[] = [];
   loadingComments: boolean = true;
   loadingTypes: boolean = false;
@@ -118,7 +122,8 @@ export class WorkItemNewDetailComponent implements OnInit, OnDestroy, AfterViewC
     private workItemDataService: WorkItemDataService,
     private workItemTypeControlService: WorkItemTypeControlService,
     private renderer: Renderer2,
-    private modalService: ModalService
+    private modalService: ModalService,
+    private store: Store<AppState>
   ) {}
 
   @HostListener('document:click', ['$event.target','$event.target.classList.contains('+'"assigned_user"'+')'])
@@ -142,25 +147,28 @@ export class WorkItemNewDetailComponent implements OnInit, OnDestroy, AfterViewC
       .takeUntil(takeUntilObserver)
       .subscribe((params) => {
           let workItemId = params['id'];
-          if (workItemId === 'new') {
-            // Create new work item ID
-            // you can add type, iteration and area GET params to the url to preselect values
-            let type = this.route.snapshot.queryParams['type'];
-            let iteration = this.route.snapshot.queryParams['iteration'];
-            let area = this.route.snapshot.queryParams['area'];
-            this.createWorkItemObj(type, iteration, area);
-          } else if (workItemId.split('-').length > 1) {
+          let workItem: WorkItemUI[];
+         
+           if (workItemId.split('-').length > 1) {
             // The ID is a UUID
             // To make it backword compaitable
             // We find the number and redirect
             // the URL to the new humna readable URL
-            this.workItemService.getWorkItemByNumber(workItemId)
-              .subscribe((workItem: WorkItem) => {
-                let urlSplit = location.pathname.split('/');
-                urlSplit[urlSplit.length - 1] = workItem.attributes['system.number'];
-                const redirectTo = urlSplit.join('/');
-                this.router.navigateByUrl(redirectTo);
-              })
+            this.store.select('listPage').select('workItems').subscribe(workItems => {
+              workItem = workItems.filter(workItem => workItem.id == workItemId)
+            });
+            
+            if(workItem.length < 1 ) { 
+              this.store.dispatch(new WorkItemDetailActions.GetWorkItemByNumber(workItemId));
+              this.store.select('workItemDetail').select('workItem').subscribe(wi => workItem[0] = wi)
+            }
+            
+            //this.workItemService.getWorkItemByNumber(workItemId)
+            let urlSplit = location.pathname.split('/');
+            urlSplit[urlSplit.length - 1] = workItem[0].sysNumber;
+            const redirectTo = urlSplit.join('/');
+            this.router.navigateByUrl(redirectTo);
+              
           } else {
             if (Object.keys(params).indexOf('entity') > -1
               && Object.keys(params).indexOf('space') > -1) {
@@ -196,139 +204,37 @@ export class WorkItemNewDetailComponent implements OnInit, OnDestroy, AfterViewC
     onResize(event){
 
     }
-  createWorkItemObj(type: string, iterationId: string, areaId: string) {
-    this.workItem = new WorkItem();
-    this.workItem.id = null;
-    this.workItem.attributes = new Map<string, string | number>();
-    this.workItem.attributes['system.title'] = '';
-    this.workItem.attributes['system.description'] = '';
-    this.workItem.attributes['system.description.rendered'] = '';
-    this.workItem.relationships = new WorkItemRelations();
-    this.workItem.type = 'workitems';
-    this.workItem.relationships = {
-      baseType: {
-        data: {
-          id: type,
-          type: 'workitemtypes'
-        }
-      }
-    } as WorkItemRelations;
-    // create base empty relationship structure
-    this.workItem.relationships = Object.assign(this.workItem.relationships, {});
-    // Add creator
-    this.userService.getUser()
-      .subscribe(
-        user => {
-          this.workItem.relationships.creator = {
-            data: user
-          };
-        },
-        err => console.log(err)
-      );
-    // if the iteration is given, add the iteration
-    if (iterationId) {
-      this.iterationService.getIterationById(iterationId)
-      .subscribe(
-        iteration => {
-          // update the iteration value list
-          this.getIterations();
-          // select the returned iteration in that list
-          this.iterations.forEach(thisIteration => thisIteration.selected = thisIteration.key === iteration.id);
-          // set the value on the model
-          this.workItem.relationships.iteration = {
-            data: iteration
-          };
-        },
-        err => console.log(err)
-      );
-    }
-    // if the area is given, add the area
-    if (areaId) {
-      this.areaService.getAreaById(areaId)
-      .subscribe(
-        area => {
-          // update the area value list
-          this.getAreas();
-          // select the returned area in that list
-          this.areas.forEach(thisArea => thisArea.selected = thisArea.key === area.id);
-          // set the value on the model
-          this.workItem.relationships.area = {
-            data: area
-          };
-        },
-        err => console.log(err)
-      );
-    }
-    this.workItem.relationalData = {};
-    this.workItemService.resolveType(this.workItem);
-    this.workItem.attributes['system.state'] = 'new';
-  }
-
+  
   loadWorkItem(id: string, owner: string = '', space: string = ''): void {
     const t1 = performance.now();
+    this.store.dispatch(new WorkItemDetailActions.GetWorkItemByNumber(id,owner,space));
     this.eventListeners.push(
-      this.workItemDataService.getItembyNumber(id)
-        .do(workItem => {
-          if (workItem) {
-            this.workItem = workItem;
-            const t2 = performance.now();
-            console.log('Performance :: Details page first paint (local data) - '  + (t2 - t1) + ' milliseconds.');
-          }
-        })
-        .do (() => {
-          this.loadingComments = true;
-          this.loadingTypes = true;
-          this.loadingIteration = true;
-          this.loadingArea = true;
-          this.loadingLabels = true;
-          this.loadingAssignees = true;
-        })
-        .switchMap(() => this.workItemService.getWorkItemByNumber(id, owner, space))
-        .do(workItem => {
-          this.workItem = workItem;
-          this.workItemDataService.setItem(workItem);
-          // Open the panel once work item is ready
-          const t2 = performance.now();
-          console.log('Performance :: Details page first paint - '  + (t2 - t1) + ' milliseconds.');
-        })
-        .do (workItem => console.log('Work item fetched: ', cloneDeep(workItem)))
-        .take(1)
-        .switchMap(() => {
-          return Observable.combineLatest(
-            this.resolveWITypes(),
-            this.resolveAssignees(),
-            this.resolveCreators(),
-            this.resolveArea(),
-            this.resolveIteration(),
-            this.resolveLinks(),
-            this.resolveComments(),
-            this.resolveLabels()
-          )
-        })
-        .subscribe(() => {
+      this.store.select('workItemDetail').select('workItem').switchMap((workItem) => {
+        this.workItem = cloneDeep(workItem);
+        const t2 = performance.now();
+        console.log('Performance :: Details page first paint (local data) - '  + (t2 - t1) + ' milliseconds.');
+        this.loadingComments = true;
+        this.loadingTypes = true;
+        this.loadingIteration = true;
+        this.loadingArea = true;
+        this.loadingLabels = true;
+        this.loadingAssignees = true; 
+        return Observable.combineLatest(
+          this.resolveWITypes(),
+          this.resolveAssignees(),
+          this.resolveCreators(),
+          this.resolveArea(),
+          this.resolveIteration(),
+          this.resolveLinks(),
+          this.resolveComments(),
+          this.resolveLabels()
+        );
+      })
+      .subscribe(() => {
           this.closeUserRestFields();
-          this.workItemPayload = {
-            id: this.workItem.id,
-            number: this.workItem.number,
-            attributes: {
-              version: this.workItem.attributes['version']
-            },
-            links: {
-              self: this.workItem.links.self
-            },
-            type: this.workItem.type
-          };
-          // init dynamic form
-          if (this.workItem.relationships.baseType.data.attributes) {
-            this.dynamicFormGroup = this.workItemTypeControlService.toFormGroup(this.workItem);
-            this.dynamicFormDataArray = this.workItemTypeControlService.toAttributeArray(this.workItem.relationships.baseType.data.attributes.fields);
-          }
-        },
-        err => {
-          //setTimeout(() => this.itemSubscription.unsubscribe());
-          // this.closeDetails();
-        })
-      );
+        }
+      )
+    );
   }
 
   resolveWITypes(): Observable<any> {
