@@ -22,7 +22,8 @@ describe('IterationMapper', () => {
         workItemTotalCount: 0,
         workItemClosedCount: 0,
         parentId: 'parent_01',
-        hasChildren: false
+        hasChildren: false,
+        type: 'iterations',
     } as IterationUI;
 
     iterationService  = {
