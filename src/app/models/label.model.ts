@@ -49,6 +49,7 @@ export interface LabelUI extends modelUI {
   borderColor: string;
   textColor: string;
   type: string;
+  selected: boolean;
 }
 
 export class LabelMapper implements Mapper<LabelService, LabelUI> {
@@ -74,6 +75,9 @@ export class LabelMapper implements Mapper<LabelService, LabelUI> {
     }, {
       fromPath: ['type'],
       toPath: ['type']
+    }, {
+      toPath: ['selected'],
+      toValue: false
     }
   ];
 

@@ -9,8 +9,8 @@ export const ADD_SUCCESS    = '[label] AddSuccess';
 export const ADD_ERROR      = '[label] AddError';
 
 export class Add implements Action {
-  payload: any;
-  constructor(payload: any) {
+  payload: LabelUI;
+  constructor(payload: LabelUI) {
     this.payload = payload;
   }
   readonly type = ADD;
@@ -33,8 +33,8 @@ export class GetError implements Action {
 }
 
 export class AddSuccess implements Action {
-  payload: LabelModel;
-  constructor(payload: LabelModel) {
+  payload: LabelUI;
+  constructor(payload: LabelUI) {
     this.payload = payload;
   }
   readonly type = ADD_SUCCESS;
