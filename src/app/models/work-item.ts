@@ -23,7 +23,7 @@ export class WorkItem {
   id: string;
   number?: number;
   relationships?: WorkItemRelations;
-  type: string;
+  type?: string;
   relationalData?: RelationalData;
   links?: {
     self: string;
@@ -110,7 +110,6 @@ export interface WorkItemUI {
   descriptionMarkup: string;
   descriptionRendered: string;
   version: number;
-  link: string;
 
 
   area: AreaUI;
@@ -136,8 +135,8 @@ export class WorkItemMapper implements Mapper<WorkItemService, WorkItemUI> {
   wiTypeMapper = new WorkItemTypeMapper();
   areaMapper = new AreaMapper();
   userMapper = new UserMapper();
-  lMapper = new LabelMapper();
-  cMapper = new CommentMapper(this.userMapper);
+  labelMapper = new LabelMapper();
+  commentMapper = new CommentMapper(this.userMapper);
 
   serviceToUiMapTree: MapTree = [{
       fromPath: ['id'],
@@ -147,11 +146,81 @@ export class WorkItemMapper implements Mapper<WorkItemService, WorkItemUI> {
       toPath: ['title']
     }, {
       fromPath: ['attributes','system.number'],
-      toPath: ['sysNumber']
+      toPath: ['number']
     }, {
-      fromPath: ['attributes','createdAt'],
+      fromPath: ['attributes','system.created_at'],
       toPath: ['createdAt']
-    }
+    }, {
+      fromPath: ['attributes','system.updated_at'],
+      toPath: ['updatedAt']
+    }, {
+      fromPath: ['attributes','system.state'],
+      toPath: ['state']
+    }, {
+      fromPath: ['attributes','system.description.markup'],
+      toPath: ['descriptionMarkup']
+    }, {
+      fromPath: ['attributes','system.description.rendered'],
+      toPath: ['descriptionRendered']
+    }, {
+      fromPath: ['attributes','version'],
+      toPath: ['version']
+    }, {
+      fromPath: ['links','self'],
+      toPath: ['workItemLink']
+    }, {
+      fromPath: ['relationships','area','data'],
+      toPath: ['area'],
+      toFunction: this.areaMapper.toUIModel.bind(this.areaMapper)
+    }, {
+      fromPath: ['relationships','creator','data'],
+      toPath: ['creator'],
+      toFunction: this.userMapper.toUIModel.bind(this.userMapper)
+    }, {
+      fromPath: ['relationships','iteration','data'],
+      toPath: ['iteration'],
+      toFunction: this.itMapper.toUIModel.bind(this.itMapper)
+    }, {
+      fromPath: ['relationships','baseType','data'],
+      toPath: ['type'],
+      toFunction: this.wiTypeMapper.toUIModel.bind(this.wiTypeMapper)
+    }, {
+      fromPath: ['relationships','comments','data'],
+      toPath: ['comments'],
+      toFunction: function(comments: Comment[]) {
+        return comments.map(comment => this.commentMapper.toUIModel(comment))
+      }.bind(this.commentMapper)
+    }, {
+      fromPath: ['relationships','assignees','data'],
+      toPath: ['assignees'],
+      toFunction: function(assignees: User[]) {
+        return assignees.map(assignee => this.userMapper.toUIModel(assignee))
+      }.bind(this.userMapper)
+    }, {
+      fromPath: ['relationships','labels','data'],
+      toPath: ['labels'],
+      toFunction: function(labels: LabelModel[]) {
+        return labels.map(label => this.labelMapper.toUIModel(label))
+      }.bind(this.labelMapper)
+    }, {
+      fromPath: ['hasChildren'],
+      toPath: ['hasChildren']
+    }, {
+      fromPath: ['relationships','parent','data','id'],
+      toPath: ['parentID']
+    }, {
+      fromPath: ['relationships','children','links','related'],
+      toPath: ['childrenLink']
+    }, {
+      toPath: ['treeStatus'],
+      toValue: 'collapsed'
+    }, {
+      toPath: ['childrenLoaded'],
+      toValue: false
+    }, {
+      toPath: ['bold'],
+      toValue: false
+    }, 
   ];
 
   uiToServiceMapTree: MapTree = [{
@@ -161,11 +230,69 @@ export class WorkItemMapper implements Mapper<WorkItemService, WorkItemUI> {
       toPath: ['attributes','system.title'],
       fromPath: ['title']
     }, {
-      toPath: ['type'],
-      toValue: 'workitems'
+      toPath: ['attributes','system.created_at'],
+      fromPath: ['createdAt']
+    }, {
+      toPath: ['attributes','system.updated_at'],
+      fromPath: ['updatedAt']
     }, {
       toPath: ['attributes','system.state'],
-      fromPath: ['wiState']
+      fromPath: ['state']
+    }, {
+      toPath: ['attributes','system.description.markup'],
+      fromPath: ['descriptionMarkup']
+    }, {
+      toPath: ['attributes','system.description.rendered'],
+      fromPath: ['descriptionRendered']
+    }, {
+      toPath: ['attributes','version'],
+      fromPath: ['version']
+    }, {
+      toPath: ['links','self'],
+      fromPath: ['workItemLink']
+    }, {
+      toPath: ['relationships','area','data'],
+      fromPath: ['area'],
+      toFunction: this.areaMapper.toServiceModel.bind(this.areaMapper)
+    }, {
+      toPath: ['relationships','creator','data'],
+      fromPath: ['creator'],
+      toFunction: this.userMapper.toServiceModel.bind(this.userMapper)
+    }, {
+      toPath: ['relationships','iteration','data'],
+      fromPath: ['iteration'],
+      toFunction: this.itMapper.toServiceModel.bind(this.itMapper)
+    }, {
+      toPath: ['relationships','baseType','data'],
+      fromPath: ['type'],
+      toFunction: this.wiTypeMapper.toServiceModel.bind(this.wiTypeMapper)
+    }, {
+      toPath: ['relationships','comments','data'],
+      fromPath: ['comments'],
+      toFunction: function(comments: CommentUI[]) {
+        return comments.map(comment => this.commentMapper.toServiceModel(comment))
+      }.bind(this.commentMapper)
+    }, {
+      toPath: ['relationships','assignees','data'],
+      fromPath: ['assignees'],
+      toFunction: function(assignees: UserUI[]) {
+        return assignees.map(assignee => this.userMapper.toServiceModel(assignee))
+      }.bind(this.userMapper)
+    }, {
+      fromPath: ['relationships','labels','data'],
+      toPath: ['labels'],
+      toFunction: function(labels: LabelUI[]) {
+        return labels.map(label => this.labelMapper.toServiceModel(label))
+      }.bind(this.labelMapper)
+    }, {
+      toPath: ['hasChildren'],
+      fromPath: ['hasChildren']
+    }, {
+      toPath: ['relationships','parent','data','id'],
+      fromPath: ['parentID']
+    }, {
+      toPath: ['relationships','children','links','related'],
+      fromPath: ['childrenLink']
     }
   ];
 
@@ -179,27 +306,5 @@ export class WorkItemMapper implements Mapper<WorkItemService, WorkItemUI> {
     return switchModel<WorkItemUI, WorkItemService>(
       arg, this.uiToServiceMapTree
     );
-  }
-
-  tempToServiceModel(arg: WorkItemUI, workItemService: WorkItemService): WorkItemService {
-    workItemService.relationalData.area = this.areaMapper.toServiceModel(arg.area);
-    workItemService.relationalData.assignees = arg.assignees.map(a => this.userMapper.toServiceModel(a));
-    workItemService.relationalData.creator = this.userMapper.toServiceModel(arg.creator);
-    workItemService.relationalData.comments = arg.comments.map(c => this.cMapper.toServiceModel(c));
-    workItemService.relationalData.iteration = this.itMapper.toServiceModel(arg.iteration);
-    workItemService.relationalData.labels = arg.labels.map(l => this.lMapper.toServiceModel(l));
-    workItemService.relationalData.wiType = this.wiTypeMapper.toServiceModel(arg.type);
-    return workItemService;
-  }
-
-  tempToUIModel(arg: WorkItemService, workItemUI: WorkItemUI): WorkItemUI {
-    workItemUI.area = this.areaMapper.toUIModel(arg.relationalData.area);
-    workItemUI.assignees = arg.relationalData.assignees.map(a => this.userMapper.toUIModel(a));
-    workItemUI.creator = this.userMapper.toUIModel(arg.relationalData.creator);
-    workItemUI.comments = arg.relationalData.comments.map(c => this.cMapper.toUIModel(c));
-    workItemUI.iteration = this.itMapper.toUIModel(arg.relationalData.iteration);
-    workItemUI.labels = arg.relationalData.labels.map(l => this.lMapper.toUIModel(l));
-    workItemUI.type = this.wiTypeMapper.toUIModel(arg.relationalData.wiType);
-    return workItemUI;
   }
 }
