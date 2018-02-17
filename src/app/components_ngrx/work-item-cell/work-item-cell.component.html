@@ -8,11 +8,11 @@
 
 <div *ngIf="col === 'type'">
   <span class="color-grey margin-right-3 type-icon
-    {{row.type?.data?.attributes?.icon}}"
-    title="{{row.type?.data?.attributes?.name}}">
+    {{row.type?.icon}}"
+    title="{{row.type?.name}}">
 
   </span>
-  <span>{{row.type?.data?.attributes?.name}}</span>
+  <span>{{row.type?.name}}</span>
 </div>
 
 <!-- Title -->
@@ -21,7 +21,7 @@
   <div class="wi-detail-title">
     <p class="truncate pointer"
         [class.bold]="row.bold"
-        (click)="onPreview($event, row.id)"> {{row.title}} </p>
+        (click)="onPreview($event, row['id'])"> {{row.title}} </p>
   </div>
   <div class="dib text-right wi-detail-icon">
     <a class="fa fa-list-alt padding-v-5 pointer"
@@ -31,10 +31,10 @@
 <!-- Status -->
 
 <div *ngIf="col === 'status'">
-  <span class="padding-right-5 padding-top-4" almIcon [iconType]="row.status">
+  <span class="padding-right-5 padding-top-4" almIcon [iconType]="row.state">
   </span>
   <span>
-    {{row.status}}
+    {{row.state}}
   </span>
 </div>
 
@@ -50,15 +50,15 @@
 
 <!-- Iteration -->
   <span *ngIf="col === 'iteration'">
-    {{row.iteration.attributes?.parent_path === '/' ? 'NA' : row.iteration.attributes?.name}}
+    {{row.iteration?.parentPath === '/' ? 'NA' : row.iteration?.name}}
   </span>
 
 <!-- Creator -->
 
 <div *ngIf="col === 'creator'" class="user-avatar">
   <img placement="left"
-        tooltip="{{row.creator?.attributes?.fullName}}"
-        src="{{row.creator?.attributes?.imageURL + '&s=23'}}"
+        tooltip="{{row.creator?.name}}"
+        src="{{row.creator?.avatar + '&s=23'}}"
         onError="this.src='https://avatars0.githubusercontent.com/u/563119?v=3&s=23'" />
 </div>
 
