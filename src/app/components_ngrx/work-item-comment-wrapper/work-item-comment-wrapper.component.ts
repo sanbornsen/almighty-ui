@@ -2,7 +2,7 @@ import {
     Component,
     Input,
     ViewEncapsulation
-  } from '@angular/core';
+} from '@angular/core';
 
 import { Store } from '@ngrx/store';
 import { AppState } from '../../states/app.state';
