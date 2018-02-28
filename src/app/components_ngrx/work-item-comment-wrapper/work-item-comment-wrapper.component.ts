@@ -22,7 +22,7 @@ export class WorkItemCommentWrapperComponent {
     @Input() loggedIn: Boolean;
     @Input() loggedInUser: User;
     
-    comments: CommentState;
+    comments: CommentState = [];
 
     private commentSource = this.store
     .select('detailPage')
@@ -40,17 +40,17 @@ export class WorkItemCommentWrapperComponent {
           comment: event
         };
         this.store.dispatch(new CommentActions.Add(payload));
-        this.getComments;
+        this.getComments();
     }
     
     updateComment(comment) {
         this.store.dispatch(new CommentActions.Update(comment));
-        this.getComments;
+        this.getComments();
     }
     
     deleteComment(event: any) {
         this.store.dispatch(new CommentActions.Delete(event));
-        this.getComments;
+        this.getComments();
     }
 }
   
