@@ -1,3 +1,4 @@
+import { CommonSelectorModule } from './../common-selector/common-selector.module';
 import { LabelsModule } from './../labels/labels.module';
 import { TypeaheadDropDownModule } from './../../components/typeahead-dropdown/typeahead-dropdown.module';
 import { AlmUserNameModule } from './../../pipes/alm-user-name.module';
@@ -49,6 +50,7 @@ import { LabelSelectorModule } from '../label-selector/label-selector.module';
     AssigneesModule,
     AssigneeSelectorModule,
     CommonModule,
+    CommonSelectorModule,
     FormsModule,
     WidgetsModule,
     InlineInputModule,
