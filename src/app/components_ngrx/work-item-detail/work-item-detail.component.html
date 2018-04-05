@@ -199,13 +199,21 @@
                 <span *ngIf="loadingArea"
                   class="spinner spinner-sm spinner-inline">
                 </span>
-                <typeahead-dropdown #areaSelectbox
+                <common-selector
+                  *ngIf="!loadingArea"
+                  [noValueLabel]="'None'"
+                  id="area-dropdown"
+                  [items]="areas"
+                  [selectedItems]="selectedAreas"
+                  (onCloseSelector)="areaUpdated($event)">
+                </common-selector>
+                <!-- <typeahead-dropdown #areaSelectbox
                   *ngIf="!loadingArea"
                   id="area-dropdown" class="area-dropdown"
                   noValueLabel="None" [values]="areas"
                   (onFocus)="focusArea()"
                   (onUpdate)="areaUpdated($event)">
-                </typeahead-dropdown>
+                </typeahead-dropdown> -->
             </div>
           </section>
         </div>
@@ -220,12 +228,20 @@
               <span *ngIf="loadingIteration"
                   class="spinner spinner-sm spinner-inline">
                 </span>
-                <typeahead-dropdown
+                <common-selector
+                  *ngIf="!loadingIteration"
+                  [noValueLabel]="'None'"
+                  id="iteration-dropdown"
+                  [items]="iterations"
+                  [selectedItems]="selectedIterations"
+                  (onCloseSelector)="iterationUpdated($event)">
+                </common-selector>
+                <!-- <typeahead-dropdown
                   *ngIf="!loadingIteration"
                   id="iteration-dropdown" class="iteration-dropdown"
                   #iterationSelectbox noValueLabel="None" [values]="iterations"
                   (onFocus)="focusIteration()" (onUpdate)="iterationUpdated($event)">
-                </typeahead-dropdown>
+                </typeahead-dropdown> -->
             </div>
           </section>
         </div>

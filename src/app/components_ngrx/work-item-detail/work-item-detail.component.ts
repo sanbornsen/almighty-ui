@@ -107,9 +107,11 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
   private titleCallback = null;
   private descCallback = null;
   private _areas: AreaUI[] = [];
-  private areas: any[] = []; // this goes in dropdown component
+  private areas: any[] = []; // this goes in selector component
+  private selectedAreas: any[] = []; // this goes in selector component
   private _iterations: IterationUI[] = [];
-  private iterations: any[] = []; // this goes in dropdown component
+  private iterations: any[] = []; // this goes in selector component
+  private selectedIterations: any[] = []; // this goes in selector component
   private labels: LabelUI[] = [];
   private wiTypes: WorkItemTypeUI[] = [];
 
@@ -194,12 +196,12 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
         this.loadingArea = false;
         this.loadingIteration = false;
         this.loadingLabels = false;
-        
-        if((this.detailContext === 'preview') 
+
+        if((this.detailContext === 'preview')
         && (this.descMarkdown)) {
           this.descMarkdown.closeClick();
         }
-        
+
         // set title on update
         if (this.titleCallback !== null) {
           this.titleCallback(this.workItem.title);
@@ -292,13 +294,11 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
         cssLabelClass: undefined
       }
     });
+    this.selectedAreas = this.areas.filter(a => a.selected);
   }
 
-  focusArea() {
-
-  }
-
-  areaUpdated(areaID) {
+  areaUpdated(event) {
+    const areaID = event[0].key;
     this.loadingArea = true;
     let workItem = {} as WorkItemUI;
     workItem['version'] = this.workItem.version;
@@ -318,13 +318,11 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
         cssLabelClass: undefined
       }
     });
+    this.selectedIterations = this.iterations.filter(i => i.selected);
   }
 
-  focusIteration() {
-
-  }
-
-  iterationUpdated(iterationID) {
+  iterationUpdated(event) {
+    const iterationID = event[0].key;
     this.loadingIteration = true;
     let workItem = {} as WorkItemUI;
     workItem['version'] = this.workItem.version;
