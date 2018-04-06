@@ -1,3 +1,4 @@
+import { WorkItemTypeControlService } from './../../services/work-item-type-control.service';
 import { CommonSelectorModule } from './../common-selector/common-selector.module';
 import { LabelsModule } from './../labels/labels.module';
 import { TypeaheadDropDownModule } from './../../components/typeahead-dropdown/typeahead-dropdown.module';
@@ -8,7 +9,7 @@ import { AuthenticationService } from 'ngx-login-client';
 import { RouterModule } from '@angular/router';
 import { InlineInputModule } from './../../widgets/inlineinput/inlineinput.module';
 import { WidgetsModule, MarkdownModule } from 'ngx-widgets';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { UserMapper } from './../../models/user';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
@@ -20,6 +21,8 @@ import {
 } from './../work-item-comment-wrapper/work-item-comment-wrapper.module';
 import { PlannerModalModule } from '../../components/modal/modal.module';
 import  { WorkItemLinkModule } from './../work-item-link/work-item-link.module';
+import { DynamicFieldComponent } from '../dynamic-field/dynamic-field.component';
+import { MyDatePickerModule } from 'mydatepicker';
 
 // ngrx stuff
 import { StoreModule } from '@ngrx/store';
@@ -61,9 +64,11 @@ import { LabelSelectorModule } from '../label-selector/label-selector.module';
     LabelsModule,
     LabelSelectorModule,
     MarkdownModule,
+    MyDatePickerModule,
     WorkItemCommentWrapperModule,
     PlannerModalModule,
     WorkItemLinkModule,
+    ReactiveFormsModule,
     StoreModule.forFeature('detailPage', {
       comments: CommentReducer,
       workItem: DetailWorkItemReducer,
@@ -89,10 +94,12 @@ import { LabelSelectorModule } from '../label-selector/label-selector.module';
     UrlService,
     BsDropdownConfig,
     AuthenticationService,
-    TooltipConfig
+    TooltipConfig,
+    WorkItemTypeControlService
   ],
   declarations: [
-    WorkItemDetailComponent
+    WorkItemDetailComponent,
+    DynamicFieldComponent
   ],
   exports: [
     WorkItemDetailComponent
