@@ -7,6 +7,7 @@ import { AppState } from './../states/app.state';
 import { Observable } from 'rxjs';
 import { WorkItemService as WIService } from './../services/work-item.service';
 import { WorkItemMapper, WorkItem, WorkItemService, WorkItemResolver, WorkItemUI } from './../models/work-item';
+import { cloneDeep } from 'lodash';
 
 export type Action = WorkItemActions.All;
 
@@ -46,7 +47,10 @@ export class WorkItemEffects {
       workItemResolver.resolveType(state.workItemTypes);
       workItemResolver.resolveAssignees(state.collaborators);
       workItemResolver.resolveWiLabels(state.labels);
-      return workItemResolver.getWorkItem();
+      let wiu = workItemResolver.getWorkItem();
+      let wid = this.workItemMapper.toDynamicUIModel(wi, wiu.type.dynamicfields);
+      console.log("###-1", wiu, wid);
+      return Object.assign({}, wiu, wid);
     });
   }
 
@@ -238,9 +242,11 @@ export class WorkItemEffects {
         };
       })
       .switchMap(wp => {
-        const payload = this.workItemMapper.toServiceModel(wp.payload);
+        const dynamicPayload = this.workItemMapper.toDyanmicServiceModel(wp.payload);
+        console.log("###-2", dynamicPayload);
+        const staticPayload = this.workItemMapper.toServiceModel(wp.payload);
         const state = wp.state;
-        return this.workItemService.update(payload)
+        return this.workItemService.update(staticPayload)
           .map(w => this.resolveWorkItems([w], state)[0])
           .map(w => {
             const item = state.workItems.find(i => i.id === w.id);
