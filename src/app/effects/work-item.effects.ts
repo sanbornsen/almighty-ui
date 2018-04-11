@@ -8,6 +8,7 @@ import { Observable } from 'rxjs';
 import { WorkItemService as WIService } from './../services/work-item.service';
 import { WorkItemMapper, WorkItem, WorkItemService, WorkItemResolver, WorkItemUI } from './../models/work-item';
 import { cloneDeep } from 'lodash';
+import { cleanObject } from '../models/common.model';
 
 export type Action = WorkItemActions.All;
 
@@ -49,8 +50,7 @@ export class WorkItemEffects {
       workItemResolver.resolveWiLabels(state.labels);
       let wiu = workItemResolver.getWorkItem();
       let wid = this.workItemMapper.toDynamicUIModel(wi, wiu.type.dynamicfields);
-      console.log("###-1", wiu, wid);
-      return Object.assign({}, wiu, wid);
+      return { ...wiu, ...wid };
     });
   }
 
@@ -242,17 +242,22 @@ export class WorkItemEffects {
         };
       })
       .switchMap(wp => {
+        // This order must be followed 
+        // because baseType is needed for dynamic fields
         const dynamicPayload = this.workItemMapper.toDyanmicServiceModel(wp.payload);
-        console.log("###-2", dynamicPayload);
         const staticPayload = this.workItemMapper.toServiceModel(wp.payload);
-        const payload = Object.assign({}, staticPayload,
-           {
-             attributes: Object.assign({}, 
-                                      staticPayload.attributes,
-                                      dynamicPayload.attributes)
-                                    });
+
+        // We don't update work item type
+        // So we remove it from the payload
+        const payload = cleanObject({
+          ...staticPayload,
+          ...{ attributes: {
+               ...staticPayload.attributes,
+               ...dynamicPayload.attributes
+          }}
+        }, ['baseType']);
         const state = wp.state;
-        return this.workItemService.update(staticPayload)
+        return this.workItemService.update(payload)
           .map(w => this.resolveWorkItems([w], state)[0])
           .map(w => {
             const item = state.workItems.find(i => i.id === w.id);
