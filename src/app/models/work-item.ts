@@ -277,8 +277,9 @@ export class WorkItemMapper implements Mapper<WorkItemService, WorkItemUI> {
       fromPath: ['state'],
       toPath: ['attributes','system.state'],
     }, {
+      fromPath: ['description'],
       toPath: ['attributes','system.description.markup'],
-      toValue: 'Markdown'
+      toFunction: val => val !== null ? 'Markdown' : null
     }, {
       fromPath: ['descriptionRendered'],
       toPath: ['attributes','system.description.rendered'],
@@ -363,9 +364,10 @@ export class WorkItemMapper implements Mapper<WorkItemService, WorkItemUI> {
         fromPath: ['dynamicfields', arg.type.dynamicfields[i]]
       });
     }
-    return switchModel<WorkItemUI, any>(
+    const serviceModel = switchModel<WorkItemUI, any>(
       arg, dynamicUiToServiceMapTree
     );
+    return cleanObject(serviceModel);
   }
 
   toUIModel(arg: WorkItemService): WorkItemUI {
@@ -393,10 +395,10 @@ export class WorkItemMapper implements Mapper<WorkItemService, WorkItemUI> {
           return cleanObject(a, ['attributes']);
         });
     }
-
+    
     // Removing relationship part of baseType
     if (serviceModel.relationships.baseType.data !== null) {
-      serviceModel.relationships.baseType.data =
+      serviceModel.relationships.baseType.data = 
         cleanObject(serviceModel.relationships.baseType.data, ['relationships']);
     }
 
