@@ -47,7 +47,6 @@ export class CustomQueryComponent implements OnInit, OnDestroy {
     this.eventListeners.push(
       customQueriesData
       .subscribe((customQueries) => {
-        console.log('####-1', customQueries);
         this.customQueries = customQueries;
         if (!this.startedCheckingURL && !!this.customQueries.length) {
           this.checkURL();
