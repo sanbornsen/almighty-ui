@@ -22,29 +22,14 @@ export class SelectDropdownComponent implements OnInit {
   @Input() dropdownFooter: TemplateRef<any>;
   @Input() menuItems: any[] = [];
   @Input() showSearch: boolean = false;
+  @Input() disabled: boolean = false;
 
   @Output() onSelect: EventEmitter<any> = new EventEmitter();
   @Output() onSearch: EventEmitter<any> = new EventEmitter();
   @Output() onOpen: EventEmitter<any> = new EventEmitter();
   @Output() onClose: EventEmitter<any> = new EventEmitter();
 
-  @HostListener('document:click', ['$event', '$event.target']) 
-  onClick(event: MouseEvent, target: HTMLElement) :void {
-    if (this.displayDropdown) {
-      if (!target) {
-        return;
-      }
-
-      const clickedInside = this._el.nativeElement.contains(target);
-
-      if (!clickedInside) {
-        this.closeDropdown();
-      }
-    }
-  }
-
-  constructor(private _el: ElementRef) {
-
+  constructor() {
   }
 
 
@@ -54,8 +39,10 @@ export class SelectDropdownComponent implements OnInit {
   }
 
   openDropdown() {
-    this.displayDropdown = true;
-    this.onOpen.emit('open');
+    if (!this.disabled) {
+      this.displayDropdown = true;
+      this.onOpen.emit('open');
+    }
   }
   closeDropdown() {
     this.displayDropdown = false;
@@ -68,5 +55,11 @@ export class SelectDropdownComponent implements OnInit {
 
   searchItem(text: string) {
     this.onSearch.emit(text);
+  }
+
+  clickOut() {
+    if(this.displayDropdown) {
+      this.closeDropdown();
+    }
   }
 }

@@ -1,5 +1,5 @@
 export interface modelUI {
-  id: string;
+  id?: string;
   name?: string;
 }
 
@@ -22,6 +22,7 @@ export interface MapTree {
     toFunction?: any;
   };
   length: number;
+  push: any;
 }
 
 export interface Mapper<I, O> {
