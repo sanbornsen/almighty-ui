@@ -1,4 +1,4 @@
-import { browser } from 'protractor';
+import { browser, Key } from 'protractor';
 import { PlannerPage } from '../../page_objects/planner';
 import * as support from '../../support';
 
@@ -96,7 +96,7 @@ describe('Planner Smoke Tests:', () => {
     expect(await planner.quickPreview.iterationDropdown.menu.getTextWhenReady()).toBe('No matches found.');
     await planner.quickPreview.iterationDropdownCloseButton.clickWhenReady();
     await planner.quickPreview.iterationDropdown.clickWhenReady();
-    await planner.quickPreview.typeaHeadSearch('');
+    await planner.quickPreview.iterationInput.enterText(Key.chord(Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE));
     expect(await planner.quickPreview.iterationDropdown.menu.getTextWhenReady()).not.toBe('No matches found.');
   });
 
