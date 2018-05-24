@@ -33,16 +33,8 @@ export class CommentEffects {
 
   @Effect() getWorkItemComments$: Observable<Action> = this.actions$
     .ofType<CommentActions.Get>(CommentActions.GET)
-    .withLatestFrom(this.store.select('listPage').select('collaborators'))
-    .map(([action, collaborators]) => {
-      return {
-        payload: action.payload,
-        collaborators: collaborators
-      }
-    })
-    .switchMap((cp) => {
-      const payload = cp.payload;
-      const collaborators = cp.collaborators;
+    .switchMap(action => {
+      const payload = action.payload;
       return this.workItemService.resolveComments(payload)
         .map((comments) => {
           return comments.data.map(comment => {
@@ -67,16 +59,8 @@ export class CommentEffects {
 
   @Effect() addComment$: Observable<Action> = this.actions$
     .ofType<CommentActions.Add>(CommentActions.ADD)
-    .withLatestFrom(this.store.select('listPage').select('collaborators'))
-    .map(([action, collaborators]) => {
-      return {
-        payload: action.payload,
-        collaborators: collaborators
-      }
-    })
-    .switchMap(cp => {
-      const payload = cp.payload;
-      const collaborators = cp.collaborators;
+    .switchMap(action => {
+      const payload = action.payload;
       return this.workItemService.createComment(payload.url, payload.comment)
         .map((comment) => {
           return new CommentActions.AddSuccess(
@@ -98,16 +82,8 @@ export class CommentEffects {
 
   @Effect() updateComment$: Observable<Action> = this.actions$
     .ofType<CommentActions.Update>(CommentActions.UPDATE)
-    .withLatestFrom(this.store.select('listPage').select('collaborators'))
-    .map(([action, collaborators]) => {
-      return {
-        payload: action.payload,
-        collaborators: collaborators
-      }
-    })
-    .switchMap((cp) => {
-      const payload = cp.payload;
-      const collaborators = cp.collaborators;
+    .switchMap(action => {
+      const payload = action.payload;
       const comment = this.commentMapper.toServiceModel(payload);
       return this.workItemService.updateComment(comment)
         .map((comment: CommentService) => {

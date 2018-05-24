@@ -1,4 +1,3 @@
-import { CommentQuery } from './../../models/comment';
 import { TruncateModule } from 'ng2-truncate';
 import { WorkItemTypeControlService } from './../../services/work-item-type-control.service';
 import { CommonSelectorModule } from './../common-selector/common-selector.module';
@@ -48,6 +47,9 @@ import { LinkTypeState, initialState as initialLinkTypeState } from './../../sta
 import { UrlService } from '../../services/url.service';
 import { BsDropdownConfig, BsDropdownModule } from 'ngx-bootstrap/dropdown';
 import { LabelSelectorModule } from '../label-selector/label-selector.module';
+
+import { WorkItemQuery } from './../../models/work-item';
+import { CommentQuery } from './../../models/comment';
 
 @NgModule({
   imports: [
@@ -100,7 +102,8 @@ import { LabelSelectorModule } from '../label-selector/label-selector.module';
     BsDropdownConfig,
     AuthenticationService,
     TooltipConfig,
-    WorkItemTypeControlService
+    WorkItemTypeControlService,
+    WorkItemQuery
   ],
   declarations: [
     WorkItemDetailComponent,

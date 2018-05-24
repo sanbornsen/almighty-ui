@@ -1,3 +1,7 @@
+import { AppState } from './../states/app.state';
+import { Observable } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { Injectable } from '@angular/core';
 import { cloneDeep } from 'lodash';
 import {
   WorkItemType,
@@ -9,7 +13,7 @@ import { Comments, Comment, CommentUI, CommentMapper } from './comment';
 import { Link } from './link';
 import { IterationModel, IterationUI, IterationMapper, IterationService } from './iteration.model';
 import { LabelModel, LabelUI, LabelMapper, LabelService } from './label.model';
-import { UserUI, UserMapper, UserService } from './user';
+import { UserUI, UserMapper, UserService, UserQuery } from './user';
 import {
   modelUI,
   modelService,
@@ -124,12 +128,14 @@ export interface WorkItemUI {
 
   area: AreaUI;
   iteration: IterationUI;
-  assignees: UserUI[];
-  creator: UserUI;
+  assignees: string[];
+  assigneesObs?: Observable<UserUI[]>;
+  creator: string;
+  creatorObs?: Observable<UserUI>;
   type: WorkItemTypeUI;
   labels: LabelUI[];
-  comments: CommentUI[];
-  children: WorkItemUI[];
+  comments?: CommentUI[];
+  children?: WorkItemUI[];
   commentLink: string;
   childrenLink: string;
   hasChildren: boolean;
@@ -141,7 +147,7 @@ export interface WorkItemUI {
   childrenLoaded: boolean; // false
   bold: boolean; // false
 
-  createId: number; // this is used to identify newly created item
+  createId?: number; // this is used to identify newly created item
 }
 
 export class WorkItemMapper implements Mapper<WorkItemService, WorkItemUI> {
@@ -195,9 +201,8 @@ export class WorkItemMapper implements Mapper<WorkItemService, WorkItemUI> {
       toPath: ['area'],
       toFunction: this.areaMapper.toUIModel.bind(this.areaMapper)
     }, {
-      fromPath: ['relationships','creator','data'],
-      toPath: ['creator'],
-      toFunction: this.userMapper.toUIModel.bind(this.userMapper)
+      fromPath: ['relationships','creator','data', 'id'],
+      toPath: ['creator']
     }, {
       fromPath: ['relationships','iteration','data'],
       toPath: ['iteration'],
@@ -214,8 +219,8 @@ export class WorkItemMapper implements Mapper<WorkItemService, WorkItemUI> {
       toPath: ['assignees'],
       toFunction: function(assignees: UserService[]) {
         if (!assignees) return [];
-        return assignees.map(assignee => this.userMapper.toUIModel(assignee))
-      }.bind(this)
+        return assignees.map(assignee => assignee.id)
+      }
     }, {
       fromPath: ['relationships','labels','data'],
       toPath: ['labels'],
@@ -296,8 +301,10 @@ export class WorkItemMapper implements Mapper<WorkItemService, WorkItemUI> {
       toFunction: this.areaMapper.toServiceModel.bind(this.areaMapper)
     }, {
       fromPath: ['creator'],
-      toPath: ['relationships','creator','data'],
-      toFunction: this.userMapper.toServiceModel.bind(this.userMapper)
+      toPath: ['relationships','creator','data', 'id'],
+    }, {
+      toPath: ['relationships','creator','data', 'type'],
+      toValue: 'identities'
     }, {
       fromPath: ['iteration'],
       toPath: ['relationships','iteration','data'],
@@ -312,9 +319,14 @@ export class WorkItemMapper implements Mapper<WorkItemService, WorkItemUI> {
     }, {
       fromPath: ['assignees'],
       toPath: ['relationships','assignees','data'],
-      toFunction: function(assignees: UserUI[]) {
+      toFunction: function(assignees: string[]) {
         if (!assignees) return null;
-        return assignees.map(assignee => this.userMapper.toServiceModel(assignee))
+        return assignees.map(assigneeId => {
+          return {
+            id: assigneeId,
+            type: 'identities'
+          }
+        })
       }.bind(this)
     }, {
       fromPath: ['labels'],
@@ -424,19 +436,6 @@ export class WorkItemResolver {
     }
   }
 
-  resolveAssignees(users: UserUI[]) {
-    this.workItem.assignees = this.workItem.assignees.map(assignee => {
-      return cloneDeep(users.find(u => u.id === assignee.id));
-    }).filter(item => !!item);
-  }
-
-  resolveCreator(users: UserUI[]) {
-    const creator = users.find(user => user.id === this.workItem.creator.id);
-    if(creator) {
-      this.workItem.creator = cloneDeep(creator);
-    }
-  }
-
   resolveType(types: WorkItemTypeUI[]) {
     const type = types.find(t => t.id === this.workItem.type.id);
     if (type) {
@@ -452,5 +451,46 @@ export class WorkItemResolver {
 
   getWorkItem() {
     return this.workItem;
+  }
+}
+
+
+
+@Injectable()
+export class WorkItemQuery {
+  private workItemSource = this.store
+    .select(state => state.listPage)
+    .select(state => state.workItems);
+
+  constructor(
+    private store: Store<AppState>,
+    private userQuery: UserQuery
+  ) {}
+
+  getWorkItems(): Observable<WorkItemUI[]> {
+    return this.workItemSource.map(workItems => {
+      return workItems.map(workItem => {
+        return {
+          ...workItem,
+          creatorObs: this.userQuery.getUserObservableById(workItem.creator),
+          assigneesObs: this.userQuery.getUserObservablesByIds(workItem.assignees)
+        };
+      });
+    })
+  }
+
+  getWorkItem(number: string | number): Observable<WorkItemUI> {
+    return this.workItemSource.map(workItems => {
+      return workItems.filter(wi => wi.number === number);
+    })
+    .map(items => items.length ? items[0] : null)
+    .filter(item => item !== null)
+    .map(workItem => {
+      return {
+        ...workItem,
+        creatorObs: this.userQuery.getUserObservableById(workItem.creator),
+        assigneesObs: this.userQuery.getUserObservablesByIds(workItem.assignees)
+      }
+    });
   }
 }

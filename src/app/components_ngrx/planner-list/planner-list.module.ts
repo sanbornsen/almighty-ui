@@ -56,6 +56,7 @@ import { ClickOutModule } from '../../widgets/clickout/clickout.module';
 // Data Querries
 import { CommentQuery } from './../../models/comment';
 import { UserQuery } from './../../models/user';
+import { WorkItemQuery } from './../../models/work-item';
 
 let providers = [];
 
@@ -105,7 +106,8 @@ if (process.env.ENV == 'inmemory') {
     InfotipService,
 
     CommentQuery,
-    UserQuery
+    UserQuery,
+    WorkItemQuery
   ];
 }
 

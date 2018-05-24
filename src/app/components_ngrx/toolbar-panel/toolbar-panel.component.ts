@@ -36,7 +36,7 @@ import { FilterService } from '../../services/filter.service';
 import { LabelUI } from './../../models/label.model';
 import { WorkItemTypeUI } from '../../models/work-item-type';
 import { WorkItem } from '../../models/work-item';
-import { UserUI } from './../../models/user';
+import { UserUI, UserQuery } from './../../models/user';
 import { IterationUI } from './../../models/iteration.model';
 import { GroupTypeUI } from './../../models/group-types.model';
 
@@ -143,7 +143,8 @@ export class ToolbarPanelComponent implements OnInit, AfterViewInit, OnDestroy {
     private auth: AuthenticationService,
     private userService: UserService,
     private store: Store<AppState>,
-    private cdr: ChangeDetectorRef) {
+    private cdr: ChangeDetectorRef,
+    private userQuery: UserQuery) {
   }
 
   ngOnInit() {
@@ -358,9 +359,7 @@ export class ToolbarPanelComponent implements OnInit, AfterViewInit, OnDestroy {
     this.areaData = this.store
       .select('listPage').select('areas')
       .filter(a =>!!a.length);
-    this.allUsersData = this.store
-      .select('listPage').select('collaborators')
-      .filter(a =>!!a.length);
+    this.allUsersData = this.userQuery.getCollaborators();
     this.workItemTypeData = this.store
       .select('listPage').select('workItemTypes')
       .filter(a =>!!a.length);

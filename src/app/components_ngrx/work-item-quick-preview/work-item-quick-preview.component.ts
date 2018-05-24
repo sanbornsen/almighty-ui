@@ -43,7 +43,7 @@ import { TypeaheadDropdown, TypeaheadDropdownValue } from './../../components/ty
 
 import { CommentUI } from './../../models/comment';
 import { WorkItem, WorkItemUI, WorkItemRelations } from '../../models/work-item';
-import { UserUI } from '../../models/user';
+import { UserUI, UserQuery } from '../../models/user';
 import { LabelUI } from '../../models/label.model';
 import { AssigneeSelectorComponent } from './../../components/assignee-selector/assignee-selector.component';
 import { WorkItemService } from './../../services/work-item.service';
@@ -112,10 +112,7 @@ export class WorkItemQuickPreviewComponent implements OnInit, OnDestroy {
     .select('listPage')
     .select('labels')
     .filter(l => !!l.length);
-  private collaboratorSource = this.store
-    .select('listPage')
-    .select('collaborators')
-    .filter(c => !!c.length);
+  private collaboratorSource = this.userQuery.getCollaborators();
   private workItemStateSource = this.store
     .select('listPage')
     .select('workItemStates')
@@ -154,7 +151,8 @@ export class WorkItemQuickPreviewComponent implements OnInit, OnDestroy {
     private spaces: Spaces,
     private store: Store<AppState>,
     private userService: UserService,
-    private workItemService: WorkItemService
+    private workItemService: WorkItemService,
+    private userQuery: UserQuery
   ) {}
 
   @HostListener('document:click', ['$event.target','$event.target.classList.contains('+'"assigned_user"'+')'])
