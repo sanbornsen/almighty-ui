@@ -57,6 +57,11 @@ export class WorkItemRelations {
       hasChildren: boolean;
     };
   };
+  events?: {
+    links?: {
+      related?: string;
+    }
+  };
   comments?: {
     data?: Comment[];
     links: {
@@ -117,9 +122,10 @@ export interface WorkItemUI {
   state: string;
   descriptionMarkup: string;
   descriptionRendered: string;
-  description: string;
+  description: string | {content: string, markup: 'Markdown', rendered?: string};
   version: number;
   order: number;
+  dynamicfields?: any;
 
   area: AreaUI;
   iteration: IterationUI;
@@ -131,6 +137,7 @@ export interface WorkItemUI {
   children: WorkItemUI[];
   commentLink: string;
   childrenLink: string;
+  eventLink: string;
   hasChildren: boolean;
   parentID: string;
   link: string;
@@ -209,6 +216,9 @@ export class WorkItemMapper implements Mapper<WorkItemService, WorkItemUI> {
       fromPath: ['relationships','comments','links', 'related'],
       toPath: ['commentLink']
     }, {
+      fromPath: ['relationships','events','links', 'related'],
+      toPath: ['eventLink']
+    }, {
       fromPath: ['relationships','assignees','data'],
       toPath: ['assignees'],
       toFunction: function(assignees: UserService[]) {
@@ -275,14 +285,18 @@ export class WorkItemMapper implements Mapper<WorkItemService, WorkItemUI> {
       fromPath: ['state'],
       toPath: ['attributes','system.state'],
     }, {
-      toPath: ['attributes','system.description.markup'],
-      toValue: 'Markdown'
-    }, {
       fromPath: ['descriptionRendered'],
       toPath: ['attributes','system.description.rendered'],
-    },  {
+    }, {
       fromPath: ['description'],
       toPath: ['attributes','system.description'],
+    }, {
+      fromPath: ['description'],
+      toPath: ['attributes','system.description.markup'],
+      toFunction: (val) => {
+        if (val) return 'Markdown';
+        return null;
+      }
     }, {
       fromPath: ['version'],
       toPath: ['attributes','version']
@@ -311,6 +325,9 @@ export class WorkItemMapper implements Mapper<WorkItemService, WorkItemUI> {
     }, {
       fromPath: ['commentLink'],
       toPath: ['relationships','comments','links', 'related']
+    },{
+      fromPath: ['eventLink'],
+      toPath: ['relationships','events','links', 'related']
     }, {
       fromPath: ['assignees'],
       toPath: ['relationships','assignees','data'],
@@ -339,6 +356,33 @@ export class WorkItemMapper implements Mapper<WorkItemService, WorkItemUI> {
       toValue: 'workitems'
     }
   ];
+
+  toDynamicUIModel(arg: WorkItemService, dynamicFields) {
+    let serviceToDyanmicUiMapTree: MapTree = [];
+    for(let i = 0; i < dynamicFields.length; i++) {
+      serviceToDyanmicUiMapTree.push({
+        toPath: ['dynamicfields', dynamicFields[i]],
+        fromPath: ['attributes', dynamicFields[i]]
+      });
+    }
+    return switchModel<WorkItemService, any>(
+      arg, serviceToDyanmicUiMapTree
+    );
+  }
+
+  toDyanmicServiceModel(arg: WorkItemUI) {
+    let dynamicUiToServiceMapTree: MapTree = [];
+    for(let i = 0; i < arg.type.dynamicfields.length; i++) {
+      dynamicUiToServiceMapTree.push({
+        toPath: ['attributes', arg.type.dynamicfields[i]],
+        fromPath: ['dynamicfields', arg.type.dynamicfields[i]]
+      });
+    }
+    const serviceModel = switchModel<WorkItemUI, any>(
+      arg, dynamicUiToServiceMapTree
+    );
+    return cleanObject(serviceModel);
+  }
 
   toUIModel(arg: WorkItemService): WorkItemUI {
     return switchModel<WorkItemService, WorkItemUI>(

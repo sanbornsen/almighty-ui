@@ -9,6 +9,9 @@ export class WorkItemQuickPreview extends ui.BaseElement {
   notificationToast = new ui.BaseElementArray($$('pfng-toast-notification'), 'Notification Toast');
   /* UI elements of the Top section of the workitem preview */
   closeButton = new ui.Button(this.$('.f8-detail--close'), 'WorkItem Quick Preview close button');
+  stateDiv = new ui.BaseElement(this.$('#wi-preview-state'),' State toggle');
+  iterationDropdownCloseButton = new ui.Button(this.$('.iteration-dropdown .close-pointer'),'Iteration dropdown close button');
+  areaDropdownCloseButton = new ui.Button(this.$('.area-dropdown .close-pointer'),'Area dropdown close button');
   stateDropdown = new ui.Dropdown(this.$('.dropdown-toggle'), this.$('#wi-status-dropdown'), 'WorkItem State dropdown');
   fullDetailButton = new ui.Clickable(this.$('span.dib'), 'View full details button');
   titleDiv = new ui.BaseElement(this.$('#wi-title-div'), 'Workitem title div');
@@ -18,6 +21,7 @@ export class WorkItemQuickPreview extends ui.BaseElement {
   titleErrorMessage = new ui.BaseElement(this.$('.error-message small'), 'WorkItem Title error message');
 
   /* UI elements for the middle section of the workitem preview */
+  assigneeDropdownSelector = new ui.BaseElement(this.$('assignee-selector'), ' assignee selector');
   assigneeDropdown = new ui.Dropdown(
     this.$('#f8-add-assignee'),
     this.$('assignee-selector ul.select-dropdown-menu'),
@@ -29,28 +33,28 @@ export class WorkItemQuickPreview extends ui.BaseElement {
     this.$('assignee-selector div.select-dropdown'),
     'Assignee dropdown menu');
   assigneeDiv = new ui.BaseElement(this.$('f8-assignee'), 'Assignee List Div');
+  areaDiv = new ui.BaseElement(this.$('.area-dropdown'), 'Assignee List Div');
   areaDropdown = new ui.Dropdown(
-    this.$('#area-dropdown > div > span'),
-    this.$('ul.item-ul.dropdown-list'),
+    this.areaDiv.$('f8-select-dropdown>div>span'),
+    this.areaDiv.$('.select-dropdown-menu'),
     'Area select dropdown'
   );
-  areaSaveButton = new ui.Button(this.$('#area-dropdown .save-button'), 'Area save button');
-  areaCancelButton = new ui.Button(this.$('#area-dropdown .cancel-button'), 'Area cancel button');
+  iterationDiv = new ui.BaseElement(this.$('.iteration-dropdown'), 'Iteration List Div');
 
   iterationDropdown = new ui.Dropdown(
-    this.$('#iteration-dropdown > div > span'),
-    this.$('ul.item-ul.dropdown-list'),
+    this.iterationDiv.$('f8-select-dropdown>div>span'),
+    this.iterationDiv.$('.select-dropdown-menu'),
     'Iteration select dropdown'
   );
-  iterationInput = new ui.TextInput(this.$('#valueSearchInput'), 'Iteration input');
-  iterationSaveButton = new ui.Button(this.$('#iteration-dropdown .save-button'), 'Iteration save button');
-  iterationCancelButton = new ui.Button(this.$('#iteration-dropdown .cancel-button'), 'Iteration cancel button');
+  iterationInput = new ui.TextInput(this.iterationDiv.$('.select-dropdown-search-input'), 'Iteration input');
 
   labelDropdown = new ui.Dropdown(
     this.$('#labelSelector .add-label'),
     this.$('#labelSelector ul.select-dropdown-menu'),
     'Label Select dropdown');
-  labelListDiv = new ui.BaseElementArray(this.$$('f8-label .label-wrapper>span'), 'label list Div');
+  labelsDiv = new ui.BaseElement(this.$('.f8-detail__labels'), ' labels Div');
+  labels = new ui.BaseElement(this.labelsDiv.$('.label-wrapper'),' labels ');
+  labelListDiv = new ui.BaseElementArray(this.labelsDiv.$$('f8-label .label-wrapper>span'), 'label list Div');
   labelDropDownDiv = new ui.BaseElement(this.$('#labelSelector .select-dropdown'), 'dropdown div');
   labelDropdownCloseButton = new ui.Clickable(this.labelDropDownDiv.$('.close-pointer'),'label dropdown close Button');
   createLabelButton = new ui.Clickable(this.labelDropDownDiv.$('.create-label-button'),'Create new label');
@@ -96,7 +100,8 @@ export class WorkItemQuickPreview extends ui.BaseElement {
   commentsInputField = new ui.TextInput(this.commentDiv.$('.editor-box.editor-markdown'), 'comment input field');
   commentSaveButton = new ui.Button(this.commentDiv.$('.btn-save'), 'Comment save button');
   commentCancelButton = new ui.Button(this.commentDiv.$('.fl.btn.btn-default.pull-right.action-btn'), 'Comment cancel button');
-  commentsText = new ui.BaseElementArray(this.$$('.f8-comment-body .editor-box.editor-preview'), 'Comment List');
+  commentsText = new ui.BaseElementArray(this.$$('.f8-comment-body .comment .editor-box.editor-preview'), 'Comment List');
+  commentsCount = new ui.BaseElement(this.$('#total_comments'), 'comment count')
 
   constructor(ele: ElementFinder, name: string = '') {
     super(ele, name);
@@ -126,7 +131,7 @@ export class WorkItemQuickPreview extends ui.BaseElement {
     await browser.sleep(2000);
     await this.areaDropdown.clickWhenReady();
     await this.areaDropdown.select(areaTitle);
-    await this.areaSaveButton.clickWhenReady();
+    await this.areaDropdownCloseButton.clickWhenReady();
     await this.loadingAnimation.untilCount(0);
   }
 
@@ -135,7 +140,7 @@ export class WorkItemQuickPreview extends ui.BaseElement {
     await browser.sleep(2000);
     await this.iterationDropdown.clickWhenReady();
     await this.iterationDropdown.select(iterationTitle);
-    await this.iterationSaveButton.clickWhenReady();
+    await this.iterationDropdownCloseButton.clickWhenReady();
     await this.notificationToast.untilCount(1);
   }
 
@@ -152,9 +157,13 @@ export class WorkItemQuickPreview extends ui.BaseElement {
   }
 
   async addCommentAndSave(comment: string) {
-    await this.ready()
+    await this.ready();
+    let count = await this.commentsCount.getTextWhenReady();
     await this.addComment(comment);
     await this.commentSaveButton.clickWhenReady();
+    await this.commentSaveButton.untilHidden();
+    count = (parseInt(count) + 1).toString();
+    await this.commentsCount.untilTextIsPresent(count);
   }
 
   async addCommentAndCancel(comment: string) {
@@ -162,18 +171,22 @@ export class WorkItemQuickPreview extends ui.BaseElement {
     await this.commentCancelButton.clickWhenReady();
   }
 
-  async addLabel(label: string) {
+  async addLabel(label: string, unassignLabel=false) {
     await this.labelDropdown.clickWhenReady()
     await this.labelDropdown.select(label);
     await this.labelDropdownCloseButton.clickWhenReady();
+    await this.loadingAnimation.untilCount(0);
+    if(!unassignLabel) {
+      await this.labels.untilTextIsPresent(label);
+    }
   }
 
-  async addLink(link: string, workItem: string) {
+  async addLink(link: string, searchWorkItem: string, workItem: string) {
     await this.linksToggleButton.clickWhenReady();
     await this.createLinkButton.clickWhenReady();
     await this.linkTypeDropdown.clickWhenReady();
     await this.linkTypeDropdown.select(link);
-    await this.searchWorkItem.enterText(workItem);
+    await this.searchWorkItem.enterText(searchWorkItem);
     await browser.sleep(1000);
     await this.workItemDropdown.select(workItem);
     await this.linkButton.isPresent();
@@ -187,6 +200,7 @@ export class WorkItemQuickPreview extends ui.BaseElement {
     await this.createLabelSaveButton.clickWhenReady();
     await this.labelDropdown.select(label);
     await this.labelDropdownCloseButton.clickWhenReady();
+    await this.loadingAnimation.untilCount(0);
   }
 
   // Try to click on the close button, if it fails, wait for notification to disappear
@@ -251,7 +265,7 @@ export class WorkItemQuickPreview extends ui.BaseElement {
 
   async getIteration() {
     await this.loadingAnimation.untilCount(0);
-    await browser.sleep(1000);    
+    await browser.sleep(1000);
     let iteration = await this.iterationDropdown.getTextWhenReady();
     return iteration;
   }
