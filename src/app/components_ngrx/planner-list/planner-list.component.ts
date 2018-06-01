@@ -20,7 +20,7 @@ import {
   User,
   UserService
 } from 'ngx-login-client';
-import { IterationUI } from './../../models/iteration.model';
+import { IterationUI, IterationQuery } from './../../models/iteration.model';
 import { FilterService } from './../../services/filter.service';
 import { CookieService } from './../../services/cookie.service';
 import { cloneDeep, sortBy, isEqual } from 'lodash';
@@ -40,7 +40,7 @@ import * as CollaboratorActions from './../../actions/collaborator.actions';
 import * as AreaActions from './../../actions/area.actions';
 import * as WorkItemTypeActions from './../../actions/work-item-type.actions';
 import * as LabelActions from './../../actions/label.actions';
-import { WorkItemUI } from '../../models/work-item';
+import { WorkItemUI, WorkItemQuery } from '../../models/work-item';
 import * as WorkItemActions from './../../actions/work-item.actions';
 import { WorkItemPreviewPanelComponent } from '../work-item-preview-panel/work-item-preview-panel.component';
 
@@ -74,10 +74,8 @@ export class PlannerListComponent implements OnInit, OnDestroy, AfterViewChecked
     .select('listPage')
     .select('areas')
     .filter(a => !!a.length);
-  private iterationSource = this.store
-    .select('listPage')
-    .select('iterations')
-    .filter(i => !!i.length)
+  private iterationSource = this.iterationQuery.getIterations()
+    .filter(i => !!i.length);
   private labelSource = this.store
     .select('listPage')
     .select('labels')
@@ -86,14 +84,8 @@ export class PlannerListComponent implements OnInit, OnDestroy, AfterViewChecked
     .select('listPage')
     .select('collaborators')
     .filter(c => !!c.length);
-  private selectedIterationSource = this.store
-    .select('listPage')
-    .select('iterations')
-    .filter(its => !!its.length)
-    .map(its => its.find(it => it.selected));
-  private workItemSource = this.store
-    .select('listPage')
-    .select('workItems');
+  private selectedIterationSource = this.iterationQuery.getSelectedIteration();
+  private workItemSource = this.workitemQuery.getWorkitemsWithData();
   private routeSource = this.route.queryParams
     .filter(p => p.hasOwnProperty('q'));
   private quickAddWorkItemTypes: WorkItemTypeUI[] = [];
@@ -132,7 +124,9 @@ export class PlannerListComponent implements OnInit, OnDestroy, AfterViewChecked
     private auth: AuthenticationService,
     private filterService: FilterService,
     private cookieService: CookieService,
-    private urlService: UrlService
+    private urlService: UrlService,
+    private iterationQuery: IterationQuery,
+    private workitemQuery: WorkItemQuery
   ) {}
 
   ngOnInit() {
@@ -225,7 +219,6 @@ export class PlannerListComponent implements OnInit, OnDestroy, AfterViewChecked
     }
     this.loggedIn = this.auth.isLoggedIn();
     this.setWorkItemTypes();
-    this.setSelectedIterationForQuickAdd();
     this.setWorkItems();
     this.setDataTableColumns();
 
@@ -395,15 +388,6 @@ export class PlannerListComponent implements OnInit, OnDestroy, AfterViewChecked
         }
       })
     );
-  }
-
-  setSelectedIterationForQuickAdd() {
-    this.eventListeners.push(
-      this.selectedIterationSource
-        .subscribe(iteration => {
-          this.selectedIteration = iteration;
-        })
-    )
   }
 
   /**

@@ -18,6 +18,11 @@ import {
   switchModel,
   cleanObject
 } from './common.model';
+//import {IterationQuery} from './iteration.model';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { AppState } from '../states/app.state';
 
 export class WorkItem extends modelService {
   hasChildren?: boolean;
@@ -128,7 +133,8 @@ export interface WorkItemUI {
   dynamicfields?: any;
 
   area: AreaUI;
-  iteration: IterationUI;
+  iterationId: string;
+  iterationObs?: Observable<IterationUI>;
   assignees: UserUI[];
   creator: UserUI;
   type: WorkItemTypeUI;
@@ -205,9 +211,8 @@ export class WorkItemMapper implements Mapper<WorkItemService, WorkItemUI> {
       toPath: ['creator'],
       toFunction: this.userMapper.toUIModel.bind(this.userMapper)
     }, {
-      fromPath: ['relationships','iteration','data'],
-      toPath: ['iteration'],
-      toFunction: this.itMapper.toUIModel.bind(this.itMapper)
+      fromPath: ['relationships','iteration','data', 'id'],
+      toPath: ['iterationId']
     }, {
       fromPath: ['relationships','baseType','data'],
       toPath: ['type'],
@@ -434,14 +439,14 @@ export class WorkItemResolver {
     }
   }
 
-  resolveIteration(iterations: IterationUI[]) {
-    const iteration = iterations.find(it => it.id === this.workItem.iteration.id);
-    if (iteration) {
-      this.workItem.iteration = cloneDeep(iteration);
-      // We don't need this much value for a work item
-      this.workItem.iteration.children = [];
-    }
-  }
+  // resolveIteration(iterations: IterationUI[]) {
+  //   const iteration = this.iterationQuery.getIterations().find(it => it.id === this.workItem.iteration.id);
+  //   if (iteration) {
+  //     this.workItem.iteration = cloneDeep(iteration);
+  //     // We don't need this much value for a work item
+  //     this.workItem.iteration.children = [];
+  //   }
+  // }
 
   resolveAssignees(users: UserUI[]) {
     this.workItem.assignees = this.workItem.assignees.map(assignee => {
@@ -471,5 +476,31 @@ export class WorkItemResolver {
 
   getWorkItem() {
     return this.workItem;
+  }
+}
+
+@Injectable()
+export class WorkItemQuery {
+  private workItemSource = this.store
+    .select(state => state.listPage)
+    .select(state => state.workItems);
+  constructor(
+    private store: Store<AppState>) {
+    // private iterationQuery: IterationQuery) {
+  }
+  getWorkItems(): Observable<WorkItemUI[]> {
+    return this.workItemSource
+    // denormalize the normalized value here
+  }
+  getWorkitemsWithData(): Observable<WorkItemUI[]>{
+    return this.getWorkItems()
+      .map((workItems: WorkItemUI[]) => {
+        return workItems.map((workItem: WorkItemUI) => {
+          return {
+            ...workItem,
+            iterationObs: this.store.select('listPage').select('iterations').select(workItem.iterationId)
+          }
+        })
+      });
   }
 }

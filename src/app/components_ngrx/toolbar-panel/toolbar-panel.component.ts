@@ -37,7 +37,7 @@ import { LabelUI } from './../../models/label.model';
 import { WorkItemTypeUI } from '../../models/work-item-type';
 import { WorkItem } from '../../models/work-item';
 import { UserUI } from './../../models/user';
-import { IterationUI } from './../../models/iteration.model';
+import { IterationUI, IterationQuery } from './../../models/iteration.model';
 import { GroupTypeUI } from './../../models/group-types.model';
 
 // ngrx stuff
@@ -143,7 +143,8 @@ export class ToolbarPanelComponent implements OnInit, AfterViewInit, OnDestroy {
     private auth: AuthenticationService,
     private userService: UserService,
     private store: Store<AppState>,
-    private cdr: ChangeDetectorRef) {
+    private cdr: ChangeDetectorRef,
+    private iterationQuery: IterationQuery) {
   }
 
   ngOnInit() {
@@ -375,9 +376,7 @@ export class ToolbarPanelComponent implements OnInit, AfterViewInit, OnDestroy {
     this.filterData = this.store
       .select('toolbar').select('filters')
       .filter(filters => !!filters.length);
-    this.iterationData = this.store
-      .select('listPage').select('iterations')
-      .filter(i => !!i.length)
+    this.iterationData = this.iterationQuery.getIterations();
     this.groupTypeData = this.store
       .select('listPage').select('groupTypes')
       .filter(i => !!i.length)

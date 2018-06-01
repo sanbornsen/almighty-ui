@@ -49,7 +49,7 @@ export class DetailWorkItemEffects {
       }
       const workItemResolver = new WorkItemResolver(workItemUI);
       workItemResolver.resolveArea(state.areas);
-      workItemResolver.resolveIteration(state.iterations);
+      //workItemResolver.resolveIteration(state.iterations);
       workItemResolver.resolveCreator(state.collaborators);
       workItemResolver.resolveType(state.workItemTypes);
       workItemResolver.resolveAssignees(state.collaborators);

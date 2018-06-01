@@ -53,7 +53,7 @@
 
 <!-- Iteration -->
   <span id="table-iteration" *ngIf="col === 'iteration'">
-    {{row.iteration?.parentPath === '/' ? 'NA' : row.iteration?.name}}
+    {{(row.iterationObs | async)?.parentPath === '/' ? 'NA' : (row.iterationObs | async)?.name}}
   </span>
 
 <!-- Creator -->

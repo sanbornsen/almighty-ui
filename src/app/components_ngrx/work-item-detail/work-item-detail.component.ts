@@ -1,7 +1,7 @@
 import { WorkItemTypeControlService } from './../../services/work-item-type-control.service';
 import { FormGroup } from '@angular/forms';
 import { LabelUI } from './../../models/label.model';
-import { IterationUI } from './../../models/iteration.model';
+import { IterationUI, IterationQuery } from './../../models/iteration.model';
 import { AreaUI } from './../../models/area.model';
 import { UserUI } from './../../models/user';
 import { WorkItemTypeUI } from './../../models/work-item-type';
@@ -55,10 +55,7 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
     .select('listPage')
     .select('areas')
     .filter(a => !!a.length);
-  private iterationSource = this.store
-    .select('listPage')
-    .select('iterations')
-    .filter(i => !!i.length);
+  private iterationSource = this.iterationQuery.getIterations();
   private labelSource = this.store
     .select('listPage')
     .select('labels')
@@ -139,7 +136,8 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
     private renderer: Renderer2,
     private workItemService: WorkItemService,
     private workItemTypeControlService: WorkItemTypeControlService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private iterationQuery: IterationQuery
   ) {
 
   }
@@ -345,7 +343,7 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
       return {
         key: i.id,
         value: (i.resolvedParentPath!='/'?i.resolvedParentPath:'') + '/' + i.name,
-        selected: i.id === this.workItem.iteration.id,
+        selected: i.id === this.workItem.iterationId,
         cssLabelClass: undefined
       }
     });

@@ -14,7 +14,7 @@ import { GroupTypesService } from '../../services/group-types.service';
 import { IterationService } from '../../services/iteration.service';
 import { WorkItemService }   from '../../services/work-item.service';
 import { FilterService } from './../../services/filter.service';
-import { IterationUI } from '../../models/iteration.model';
+import { IterationUI, IterationQuery } from '../../models/iteration.model';
 import { WorkItem } from '../../models/work-item';
 import { FabPlannerIterationModalComponent } from '../iterations-modal/iterations-modal.component';
 
@@ -66,7 +66,8 @@ export class IterationComponent implements OnInit, OnDestroy, OnChanges {
     private notifications: Notifications,
     private route: ActivatedRoute,
     private workItemService: WorkItemService,
-    private store: Store<AppState>) {
+    private store: Store<AppState>,
+    private iterationQuery: IterationQuery) {
     }
 
   ngOnInit(): void {
@@ -167,11 +168,9 @@ export class IterationComponent implements OnInit, OnDestroy, OnChanges {
             this.iterationService.getTopLevelIterations2(this.allIterations);
     } else {
       this.eventListeners.push(
-        this.store
-          .select('listPage')
-          .select('iterations')
+        this.iterationQuery.getIterations()
           .filter(iterations => !!iterations.length)
-          .subscribe((iterations: IterationState) => {
+          .subscribe((iterations: IterationUI[]) => {
             // do not display the root iteration on the iteration panel.
             this.allIterations = iterations.filter(i => {
               return !this.iterationService.isRootIteration(i.parentPath);
@@ -324,7 +323,7 @@ export class IterationComponent implements OnInit, OnDestroy, OnChanges {
             const selectedIteration =
               this.allIterations.find(it => it.id === selectedIterationID);
             if (!selectedIteration.selected) {
-              this.store.dispatch(new IterationActions.Select(selectedIteration));
+              this.store.dispatch(new IterationActions.Select(selectedIteration.id));
             }
           } else {
             this.store.dispatch(new IterationActions.Select());

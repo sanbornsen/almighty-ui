@@ -53,6 +53,7 @@ import { LabelSelectorModule } from '../label-selector/label-selector.module';
 import { SafePipeModule } from '../../pipes/safe.module';
 import { EventReducer } from '../../reducers/event.reducer';
 import { EventEffects } from '../../effects/event.effects';
+import { IterationQuery } from '../../models/iteration.model';
 
 @NgModule({
   imports: [
@@ -110,7 +111,8 @@ import { EventEffects } from '../../effects/event.effects';
     BsDropdownConfig,
     AuthenticationService,
     TooltipConfig,
-    WorkItemTypeControlService
+    WorkItemTypeControlService,
+    IterationQuery
   ],
   declarations: [
     WorkItemDetailComponent,

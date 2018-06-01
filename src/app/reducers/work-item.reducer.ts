@@ -75,8 +75,8 @@ export const WorkItemReducer: ActionReducer<WorkItemState> = (state = initialSta
 
     case WorkItemActions.UPDATE_WORKITEM_ITERATION: {
       state.forEach((i) => {
-        if(i.iteration.id === action.payload.iteration.id){
-          i.iteration = action.payload.iteration
+        if(i.iterationId === action.payload.iteration.id){
+         // i.iterationId = action.payload.iteration
         }
       });
       return [...state];
