@@ -113,7 +113,6 @@ export class ToolbarPanelComponent implements OnInit, AfterViewInit, OnDestroy {
     iconStyleClass: 'fa fa-spinner'
   };
   private areaData: Observable<AreaUI[]>;
-  private allUsersData: Observable<UserUI[]>;
   private workItemTypeData: Observable<WorkItemTypeUI[]>;
   private stateData: Observable<string[]>;
   private labelData: Observable<LabelUI[]>;
@@ -214,7 +213,7 @@ export class ToolbarPanelComponent implements OnInit, AfterViewInit, OnDestroy {
     this.eventListeners.push(
       Observable.combineLatest(
         this.areaData,
-        this.allUsersData,
+        this.userQuery.getCollaborators(),
         this.workItemTypeData,
         this.stateData,
         this.labelData
@@ -359,7 +358,6 @@ export class ToolbarPanelComponent implements OnInit, AfterViewInit, OnDestroy {
     this.areaData = this.store
       .select('listPage').select('areas')
       .filter(a =>!!a.length);
-    this.allUsersData = this.userQuery.getCollaborators();
     this.workItemTypeData = this.store
       .select('listPage').select('workItemTypes')
       .filter(a =>!!a.length);
@@ -396,32 +394,29 @@ export class ToolbarPanelComponent implements OnInit, AfterViewInit, OnDestroy {
         type: 'select'
       },
       assignee: {
-        datasource: Observable.combineLatest(this.allUsersData, this.userService.getUser()),
-        datamap: ([users, authUser]) => {
-          if (Object.keys(authUser).length > 0) {
-            users = users.filter(u => u.id !== authUser.id);
-          }
+        datasource: this.userQuery.getCollaborators(),
+        datamap: (users) => {
+          const currentUsers = users.filter(u => u.currentUser);
+          const authUser = currentUsers.length ? currentUsers[0] : null;
           return {
-            queries: users.map((user: UserUI) => {return {id: user.id, value: user.username, imageUrl: user.avatar}}),
-            primaryQueries: Object.keys(authUser).length ?
-              [{id: authUser.id, value: authUser.attributes.username + ' (me)', imageUrl: authUser.attributes.imageURL}, {id: null, value: 'Unassigned'}] :
+            queries: users.filter(u => !u.currentUser).map((user: UserUI) => {return {id: user.id, value: user.username, imageUrl: user.avatar}}),
+            primaryQueries: authUser ?
+              [{id: authUser.id, value: authUser.username + ' (me1)', imageUrl: authUser.avatar}, {id: null, value: 'Unassigned'}] :
               [{id: null, value: 'Unassigned'}]
           }
         },
-        getvalue: (user) => user.attributes.username,
         type: 'typeahead'
       },
       creator: {
-        datasource: Observable.combineLatest(this.allUsersData, this.userService.getUser()),
-        datamap: ([users, authUser]) => {
-          if (Object.keys(authUser).length > 0) {
-            users = users.filter(u => u.id !== authUser.id);
-          }
+        datasource: this.userQuery.getCollaborators(),
+        datamap: (users) => {
+          const currentUsers = users.filter(u => u.currentUser);
+          const authUser = currentUsers.length ? currentUsers[0] : null;
           return {
-            queries: users.map((user: UserUI) => {return {id: user.id, value: user.username, imageUrl: user.avatar}}),
-            primaryQueries: Object.keys(authUser).length ?
-            [{id: authUser.id, value: authUser.attributes.username + ' (me)', imageUrl: authUser.attributes.imageURL}] :
-            []
+            queries: users.filter(u => !u.currentUser).map((user: UserUI) => {return {id: user.id, value: user.username, imageUrl: user.avatar}}),
+            primaryQueries: authUser ?
+              [{id: authUser.id, value: authUser.username + ' (me)', imageUrl: authUser.avatar}] :
+              []
           }
         },
         getvalue: (user) => user.attributes.username,
@@ -521,7 +516,7 @@ export class ToolbarPanelComponent implements OnInit, AfterViewInit, OnDestroy {
   formatFilterFIelds(fields) {
     Observable.combineLatest(
       this.areaData,
-      this.allUsersData,
+      this.userQuery.getCollaborators(),
       this.workItemTypeData,
       this.stateData,
       this.labelData

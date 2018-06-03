@@ -83,7 +83,7 @@ export class PlannerListComponent implements OnInit, OnDestroy, AfterViewChecked
   private labelSource = this.store
     .select('listPage')
     .select('labels')
-    .filter(i => i !== null)
+    .filter(i => i !== null);
   private collaboratorSource = this.userQuery.getCollaborators();
   private selectedIterationSource = this.store
     .select('listPage')

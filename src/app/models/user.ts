@@ -1,8 +1,9 @@
 import { Observable } from 'rxjs/Observable';
 import { Injectable } from '@angular/core';
-import { Store, createSelector } from '@ngrx/store';
+import { Store, createSelector, createFeatureSelector } from '@ngrx/store';
 import { User, Profile, UserService as UserServiceClass } from 'ngx-login-client';
-import { AppState } from './../states/app.state';
+import { isEmpty } from 'lodash';
+import { AppState, ListPage } from './../states/app.state';
 import {
   modelUI,
   modelService,
@@ -80,12 +81,27 @@ export class UserMapper implements Mapper<UserService, UserUI> {
 
 @Injectable()
 export class UserQuery {
-  private userSource = this.store
-    .select(state => state.listPage)
-    .select(state => state.users);
-  private collaboratorSource = this.store
-    .select(state => state.listPage)
-    .select(state => state.collaborators);
+  private listPageSelector = createFeatureSelector<ListPage>('listPage');
+  private userSelector = createSelector(
+    this.listPageSelector,
+    (state) => state.users
+  );
+  private userSource = this.store.select(this.userSelector);
+
+  private collaboratorIdsSelector = createSelector(
+    this.listPageSelector,
+    (state) => state.collaborators
+  );
+
+  private collaboratorSelector = createSelector(
+    this.userSelector,
+    this.collaboratorIdsSelector,
+    (users, collabs) => isEmpty(users) ? [] : collabs.map(c => users[c])
+  );
+
+  private collaboratorSource = this.store.select(this.collaboratorSelector);
+
+
 
   constructor(
     private store: Store<AppState>,
@@ -110,24 +126,15 @@ export class UserQuery {
   }
 
   getCollaborators(): Observable<UserUI[]> {
-    return Observable.combineLatest(
-      this.userSource
-        .filter(u => !!Object.keys(u).length).take(1),
-      this.collaboratorSource
-        .filter(c => !!c.length)
-    )
-    .map(([users, collaborators]) => {
-      return collaborators.map(collabId => {
-        return users[collabId];
-      })
-    })
-    .switchMap(collaborators => {
-      return this.userService.loggedInUser
-        .map(u => {
-          return collaborators.map(c => {
-            return {...c, currentUser: u ? c.id === u.id : false};
+    return this.collaboratorSource
+      .filter(c => !!c.length)
+      .switchMap(collaborators => {
+        return this.userService.loggedInUser
+          .map(u => {
+            return collaborators.map(c => {
+              return {...c, currentUser: u ? c.id === u.id : false};
+            });
           });
-        });
-    })
+      })
   }
 }
