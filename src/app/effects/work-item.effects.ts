@@ -49,9 +49,7 @@ export class WorkItemEffects {
       const workItemResolver = new WorkItemResolver(workItemUI);
       workItemResolver.resolveArea(state.areas);
       workItemResolver.resolveIteration(state.iterations);
-      workItemResolver.resolveCreator(state.collaborators);
       workItemResolver.resolveType(state.workItemTypes);
-      workItemResolver.resolveAssignees(state.collaborators);
       workItemResolver.resolveWiLabels(state.labels);
       let wiu = workItemResolver.getWorkItem();
       let wid = this.workItemMapper.toDynamicUIModel(wi, wiu.type.dynamicfields);
@@ -80,7 +78,6 @@ export class WorkItemEffects {
           const workItemResolver = new WorkItemResolver(itemUI);
           workItemResolver.resolveArea(state.areas);
           workItemResolver.resolveIteration(state.iterations);
-          workItemResolver.resolveCreator(state.collaborators);
           workItemResolver.resolveType(state.workItemTypes);
           const wItem = workItemResolver.getWorkItem();
           let wid = this.workItemMapper.toDynamicUIModel(

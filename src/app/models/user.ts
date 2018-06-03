@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs/Observable';
 import { Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { User, Profile } from 'ngx-login-client';
+import { Store, createSelector } from '@ngrx/store';
+import { User, Profile, UserService as UserServiceClass } from 'ngx-login-client';
 import { AppState } from './../states/app.state';
 import {
   modelUI,
@@ -80,14 +80,20 @@ export class UserMapper implements Mapper<UserService, UserUI> {
 
 @Injectable()
 export class UserQuery {
-  store: Store<AppState>;
-  constructor(store: Store<AppState>) {
-    this.store = store;
-  }
+  private userSource = this.store
+    .select(state => state.listPage)
+    .select(state => state.users);
+  private collaboratorSource = this.store
+    .select(state => state.listPage)
+    .select(state => state.collaborators);
+
+  constructor(
+    private store: Store<AppState>,
+    private userService: UserServiceClass
+  ) {}
 
   getUserObservableById(id: string): Observable<UserUI> {
-    return this.store.select('listPage')
-      .select('users').select(users => users[id])
+    return this.userSource.select(users => users[id])
       // If the desired user doesn't exist then fetch it
       .do(user => {
         if(!user) {
@@ -96,5 +102,32 @@ export class UserQuery {
       })
       // filter the pipe based on availability of the user
       .filter(user => !!user);
+  }
+
+  getUserObservablesByIds(ids: string[] = []): Observable<UserUI[]> {
+    if (!ids.length) return Observable.of([]);
+    return Observable.combineLatest(ids.map(id => this.getUserObservableById(id)));
+  }
+
+  getCollaborators(): Observable<UserUI[]> {
+    return Observable.combineLatest(
+      this.userSource
+        .filter(u => !!Object.keys(u).length).take(1),
+      this.collaboratorSource
+        .filter(c => !!c.length)
+    )
+    .map(([users, collaborators]) => {
+      return collaborators.map(collabId => {
+        return users[collabId];
+      })
+    })
+    .switchMap(collaborators => {
+      return this.userService.loggedInUser
+        .map(u => {
+          return collaborators.map(c => {
+            return {...c, currentUser: u ? c.id === u.id : false};
+          });
+        });
+    })
   }
 }

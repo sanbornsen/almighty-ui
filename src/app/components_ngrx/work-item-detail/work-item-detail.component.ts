@@ -3,7 +3,7 @@ import { FormGroup } from '@angular/forms';
 import { LabelUI } from './../../models/label.model';
 import { IterationUI } from './../../models/iteration.model';
 import { AreaUI } from './../../models/area.model';
-import { UserUI } from './../../models/user';
+import { UserUI, UserQuery } from './../../models/user';
 import { WorkItemTypeUI } from './../../models/work-item-type';
 import { AuthenticationService } from 'ngx-login-client';
 import { UrlService } from './../../services/url.service';
@@ -23,7 +23,7 @@ import { MarkdownComponent } from 'ngx-widgets';
 // ngrx stuff
 import { Store } from '@ngrx/store';
 import { AppState } from './../../states/app.state';
-import { WorkItemUI } from './../../models/work-item';
+import { WorkItemUI, WorkItemQuery } from './../../models/work-item';
 import * as WorkItemActions from './../../actions/work-item.actions';
 import * as DetailWorkItemActions from './../../actions/detail-work-item.actions';
 import * as IterationActions from './../../actions/iteration.actions';
@@ -62,10 +62,7 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
   private labelSource = this.store
     .select('listPage')
     .select('labels')
-  private collaboratorSource = this.store
-    .select('listPage')
-    .select('collaborators')
-    .filter(c => !!c.length);
+  private collaboratorSource = this.userQuery.getCollaborators();
   private workItemStateSource = this.store
     .select('listPage')
     .select('workItemStates')
@@ -74,10 +71,6 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
     .select('listPage')
     .select('workItemTypes')
     .filter(w => !!w.length);
-  private workItemSource: Observable<WorkItemUI> =
-    this.store
-    .select('detailPage')
-    .select('workItem');
 
   private combinedSources = Observable.combineLatest(
     this.areaSource, this.iterationSource,
@@ -139,7 +132,9 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
     private renderer: Renderer2,
     private workItemService: WorkItemService,
     private workItemTypeControlService: WorkItemTypeControlService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private userQuery: UserQuery,
+    private workItemQuery: WorkItemQuery
   ) {
 
   }
@@ -191,10 +186,7 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
         this._iterations = iterations;
         this.labels = labels;
         this.wiTypes = type;
-        this.store.dispatch(new DetailWorkItemActions.GetWorkItem({
-          number: wiNumber
-        }));
-        return this.workItemSource;
+        return this.workItemQuery.getWorkItem(wiNumber);
       })
       .filter(w => w !== null)
       .subscribe(workItem => {

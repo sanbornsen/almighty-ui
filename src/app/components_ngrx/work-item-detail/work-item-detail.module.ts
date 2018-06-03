@@ -1,4 +1,3 @@
-import { CommentQuery } from './../../models/comment';
 import { TruncateModule } from 'ng2-truncate';
 import { WorkItemTypeControlService } from './../../services/work-item-type-control.service';
 import { CommonSelectorModule } from './../common-selector/common-selector.module';
@@ -53,6 +52,9 @@ import { LabelSelectorModule } from '../label-selector/label-selector.module';
 import { SafePipeModule } from '../../pipes/safe.module';
 import { EventReducer } from '../../reducers/event.reducer';
 import { EventEffects } from '../../effects/event.effects';
+
+import { WorkItemQuery } from './../../models/work-item';
+import { CommentQuery } from './../../models/comment';
 
 @NgModule({
   imports: [
@@ -110,7 +112,8 @@ import { EventEffects } from '../../effects/event.effects';
     BsDropdownConfig,
     AuthenticationService,
     TooltipConfig,
-    WorkItemTypeControlService
+    WorkItemTypeControlService,
+    WorkItemQuery
   ],
   declarations: [
     WorkItemDetailComponent,

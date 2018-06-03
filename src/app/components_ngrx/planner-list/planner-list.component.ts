@@ -43,6 +43,8 @@ import * as LabelActions from './../../actions/label.actions';
 import { WorkItemUI } from '../../models/work-item';
 import * as WorkItemActions from './../../actions/work-item.actions';
 import { WorkItemPreviewPanelComponent } from '../work-item-preview-panel/work-item-preview-panel.component';
+import { UserQuery } from '../../models/user';
+import { WorkItemQuery } from './../../models/work-item';
 
 @Component({
   encapsulation: ViewEncapsulation.None,
@@ -82,18 +84,13 @@ export class PlannerListComponent implements OnInit, OnDestroy, AfterViewChecked
     .select('listPage')
     .select('labels')
     .filter(i => i !== null)
-  private collaboratorSource = this.store
-    .select('listPage')
-    .select('collaborators')
-    .filter(c => !!c.length);
+  private collaboratorSource = this.userQuery.getCollaborators();
   private selectedIterationSource = this.store
     .select('listPage')
     .select('iterations')
     .filter(its => !!its.length)
     .map(its => its.find(it => it.selected));
-  private workItemSource = this.store
-    .select('listPage')
-    .select('workItems');
+  private workItemSource = this.workItemQuery.getWorkItems();
   private routeSource = this.route.queryParams
     .filter(p => p.hasOwnProperty('q'));
   private quickAddWorkItemTypes: WorkItemTypeUI[] = [];
@@ -132,7 +129,9 @@ export class PlannerListComponent implements OnInit, OnDestroy, AfterViewChecked
     private auth: AuthenticationService,
     private filterService: FilterService,
     private cookieService: CookieService,
-    private urlService: UrlService
+    private urlService: UrlService,
+    private userQuery: UserQuery,
+    private workItemQuery: WorkItemQuery
   ) {}
 
   ngOnInit() {
