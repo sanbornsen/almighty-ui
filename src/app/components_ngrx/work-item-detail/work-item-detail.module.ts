@@ -1,4 +1,3 @@
-import { CommentQuery } from './../../models/comment';
 import { TruncateModule } from 'ng2-truncate';
 import { WorkItemTypeControlService } from './../../services/work-item-type-control.service';
 import { CommonSelectorModule } from './../common-selector/common-selector.module';
@@ -55,6 +54,9 @@ import { EventReducer } from '../../reducers/event.reducer';
 import { EventEffects } from '../../effects/event.effects';
 import { IterationQuery } from '../../models/iteration.model';
 
+import { WorkItemQuery } from './../../models/work-item';
+import { CommentQuery } from './../../models/comment';
+
 @NgModule({
   imports: [
     AlmUserNameModule,
@@ -74,7 +76,7 @@ import { IterationQuery } from '../../models/iteration.model';
     MarkdownModule,
     MyDatePickerModule,
     WorkItemCommentWrapperModule,
-    WorkItemEventWrapperModule,    
+    WorkItemEventWrapperModule,
     PlannerModalModule,
     TruncateModule,
     WorkItemLinkModule,
@@ -112,7 +114,8 @@ import { IterationQuery } from '../../models/iteration.model';
     AuthenticationService,
     TooltipConfig,
     WorkItemTypeControlService,
-    IterationQuery
+    IterationQuery,
+    WorkItemQuery
   ],
   declarations: [
     WorkItemDetailComponent,
