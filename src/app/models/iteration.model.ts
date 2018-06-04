@@ -10,6 +10,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../states/app.state';
 import { Observable } from 'rxjs';
 import  {IterationService as Service} from './../services/iteration.service'
+import { iterationUiReducer } from '../reducers/iteration-reducer';
 
 export class IterationModel extends modelService {
   attributes?: IterationAttributes;
@@ -218,19 +219,11 @@ export class IterationQuery {
 
   constructor(private store: Store<AppState>,
      private iterationService: Service) {}
-  private iterations = [];
-  private iterationskey: string[] = [];
 
   getIterations(): Observable<IterationUI[]> {
     return this.iterationSource.map(iterations => {
       return Object.keys(iterations).map(id => iterations[id]);
     });
-  }
-  
-  getIterationsObservable(): Observable<IterationUI>[] {
-    return this.iterationskey.map(key => {
-      return this.iterationSource.map(iteration => iteration[key]);
-    })
   }
 
   getIterationByIdObservable(id: string): Observable<IterationUI> {
@@ -274,5 +267,19 @@ export class IterationQuery {
       .map((iterations: IterationUI[]) => {
         return iterations.filter((iteration: IterationUI) => iteration.isActive);
     });
+  }
+
+  getIterationsForDropdown(iterationId: string) {
+    return this.getIterations()
+      .map((iterations: IterationUI[]) => {
+        return iterations.map((i: IterationUI) => {
+          return {
+            key: i.id,
+            value: (i.resolvedParentPath!='/'?i.resolvedParentPath:'') + '/' + i.name,
+            selected: i.id === iterationId,
+            cssLabelClass: undefined
+          }
+        })
+      })
   }
 }
