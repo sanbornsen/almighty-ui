@@ -57,6 +57,7 @@ import { ClickOutModule } from '../../widgets/clickout/clickout.module';
 import { CommentQuery } from './../../models/comment';
 import { UserQuery } from './../../models/user';
 import { WorkItemQuery } from './../../models/work-item';
+import { LabelQuery } from '../../models/label.model';
 
 let providers = [];
 
@@ -107,6 +108,7 @@ if (process.env.ENV == 'inmemory') {
 
     CommentQuery,
     UserQuery,
+    LabelQuery,
     WorkItemQuery
   ];
 }

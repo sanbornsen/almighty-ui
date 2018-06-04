@@ -5,6 +5,10 @@ import {
   MapTree,
   switchModel
 } from './common.model';
+import { Injectable } from '@angular/core';
+import { Store, createFeatureSelector, createSelector } from '@ngrx/store';
+import { LabelService as LabelDataService } from './../services/label.service';
+import { AppState, ListPage } from './../states/app.state';
 
 export class LabelModel extends modelService {
   attributes: LabelAttributes;
@@ -106,5 +110,24 @@ export class LabelMapper implements Mapper<LabelService, LabelUI> {
     return switchModel<LabelUI, LabelService>(
       arg, this.uiToServiceMapTree
     );
+  }
+}
+
+@Injectable()
+export class LabelQuery {
+  constructor(
+    private store: Store<AppState>,
+    private labelService: LabelDataService
+  ){}
+
+  private listPageSelector = createFeatureSelector<ListPage>('listPage');
+  private labelSelector = createSelector(
+    this.listPageSelector,
+    (state) => state.labels
+  );
+  private labelSource = this.store.select(this.labelSelector);
+
+  getLables(): Store<LabelUI[]> {
+    return this.labelSource;
   }
 }

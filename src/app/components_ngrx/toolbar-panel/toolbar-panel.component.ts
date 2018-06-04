@@ -33,7 +33,7 @@ import { Space } from 'ngx-fabric8-wit';
 import { AreaUI } from '../../models/area.model';
 import { FilterModel } from '../../models/filter.model';
 import { FilterService } from '../../services/filter.service';
-import { LabelUI } from './../../models/label.model';
+import { LabelUI, LabelQuery } from './../../models/label.model';
 import { WorkItemTypeUI } from '../../models/work-item-type';
 import { WorkItem } from '../../models/work-item';
 import { UserUI, UserQuery } from './../../models/user';
@@ -143,7 +143,8 @@ export class ToolbarPanelComponent implements OnInit, AfterViewInit, OnDestroy {
     private userService: UserService,
     private store: Store<AppState>,
     private cdr: ChangeDetectorRef,
-    private userQuery: UserQuery) {
+    private userQuery: UserQuery,
+    private labelQuery: LabelQuery) {
   }
 
   ngOnInit() {
@@ -364,8 +365,8 @@ export class ToolbarPanelComponent implements OnInit, AfterViewInit, OnDestroy {
     this.stateData = this.store
       .select('listPage').select('workItemStates')
       .filter(a =>!!a.length);
-    this.labelData = this.store
-      .select('listPage').select('labels').filter(l => l !== null);
+    this.labelData = this.labelQuery.getLables()
+      .filter(l => l !== null);
     this.spaceData = this.store
       .select('listPage').select('space')
       .filter(space => space !== null);

@@ -81,6 +81,11 @@ export class UserMapper implements Mapper<UserService, UserUI> {
 
 @Injectable()
 export class UserQuery {
+  constructor(
+    private store: Store<AppState>,
+    private userService: UserServiceClass
+  ) {}
+
   private listPageSelector = createFeatureSelector<ListPage>('listPage');
   private userSelector = createSelector(
     this.listPageSelector,
@@ -100,13 +105,6 @@ export class UserQuery {
   );
 
   private collaboratorSource = this.store.select(this.collaboratorSelector);
-
-
-
-  constructor(
-    private store: Store<AppState>,
-    private userService: UserServiceClass
-  ) {}
 
   getUserObservableById(id: string): Observable<UserUI> {
     return this.userSource.select(users => users[id])

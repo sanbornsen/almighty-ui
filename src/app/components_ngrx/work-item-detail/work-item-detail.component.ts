@@ -1,6 +1,6 @@
 import { WorkItemTypeControlService } from './../../services/work-item-type-control.service';
 import { FormGroup } from '@angular/forms';
-import { LabelUI } from './../../models/label.model';
+import { LabelUI, LabelQuery } from './../../models/label.model';
 import { IterationUI } from './../../models/iteration.model';
 import { AreaUI } from './../../models/area.model';
 import { UserUI, UserQuery } from './../../models/user';
@@ -59,9 +59,7 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
     .select('listPage')
     .select('iterations')
     .filter(i => !!i.length);
-  private labelSource = this.store
-    .select('listPage')
-    .select('labels')
+  private labelSource = this.labelQuery.getLables();
   private collaboratorSource = this.userQuery.getCollaborators();
   private workItemStateSource = this.store
     .select('listPage')
@@ -134,6 +132,7 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
     private workItemTypeControlService: WorkItemTypeControlService,
     private sanitizer: DomSanitizer,
     private userQuery: UserQuery,
+    private labelQuery: LabelQuery,
     private workItemQuery: WorkItemQuery
   ) {
 

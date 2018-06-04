@@ -55,6 +55,7 @@ import { EventEffects } from '../../effects/event.effects';
 
 import { WorkItemQuery } from './../../models/work-item';
 import { CommentQuery } from './../../models/comment';
+import { LabelQuery } from './../../models/label.model';
 
 @NgModule({
   imports: [
@@ -106,6 +107,7 @@ import { CommentQuery } from './../../models/comment';
   ],
   providers: [
     CommentQuery,
+    LabelQuery,
     UserQuery,
     UserMapper,
     UrlService,

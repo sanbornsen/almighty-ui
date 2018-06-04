@@ -44,6 +44,7 @@ import { WorkItemUI } from '../../models/work-item';
 import * as WorkItemActions from './../../actions/work-item.actions';
 import { WorkItemPreviewPanelComponent } from '../work-item-preview-panel/work-item-preview-panel.component';
 import { UserQuery } from '../../models/user';
+import { LabelQuery } from './../../models/label.model';
 import { WorkItemQuery } from './../../models/work-item';
 
 @Component({
@@ -79,10 +80,8 @@ export class PlannerListComponent implements OnInit, OnDestroy, AfterViewChecked
   private iterationSource = this.store
     .select('listPage')
     .select('iterations')
-    .filter(i => !!i.length)
-  private labelSource = this.store
-    .select('listPage')
-    .select('labels')
+    .filter(i => !!i.length);
+  private labelSource = this.labelQuery.getLables()
     .filter(i => i !== null);
   private collaboratorSource = this.userQuery.getCollaborators();
   private selectedIterationSource = this.store
@@ -131,6 +130,7 @@ export class PlannerListComponent implements OnInit, OnDestroy, AfterViewChecked
     private cookieService: CookieService,
     private urlService: UrlService,
     private userQuery: UserQuery,
+    private labelQuery: LabelQuery,
     private workItemQuery: WorkItemQuery
   ) {}
 
