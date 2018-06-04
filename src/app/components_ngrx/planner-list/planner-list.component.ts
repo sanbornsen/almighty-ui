@@ -44,6 +44,7 @@ import { WorkItemUI, WorkItemQuery } from '../../models/work-item';
 import * as WorkItemActions from './../../actions/work-item.actions';
 import { WorkItemPreviewPanelComponent } from '../work-item-preview-panel/work-item-preview-panel.component';
 import { UserQuery } from '../../models/user';
+import { AreaQuery } from '../../models/area.model';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
@@ -70,9 +71,7 @@ export class PlannerListComponent implements OnInit, OnDestroy, AfterViewChecked
     .select('space')
     .do(s => {if (!s) this.store.dispatch(new SpaceActions.Get())})
     .filter(s => !!s);
-  private areaSource = this.store
-    .select('listPage')
-    .select('areas')
+  private areaSource = this.areaQuery.getAreas()
     .filter(a => !!a.length);
   private iterationSource = this.iterationQuery.getIterations()
     .filter(i => !!i.length);
@@ -125,7 +124,8 @@ export class PlannerListComponent implements OnInit, OnDestroy, AfterViewChecked
     private urlService: UrlService,
     private iterationQuery: IterationQuery,
     private userQuery: UserQuery,
-    private workItemQuery: WorkItemQuery
+    private workItemQuery: WorkItemQuery,
+    private areaQuery: AreaQuery
   ) {}
 
   ngOnInit() {

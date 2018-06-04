@@ -58,6 +58,7 @@ import { CommentQuery } from './../../models/comment';
 import { UserQuery } from './../../models/user';
 import { IterationQuery } from '../../models/iteration.model';
 import { WorkItemQuery } from '../../models/work-item';
+import { AreaQuery } from '../../models/area.model';
 
 let providers = [];
 
@@ -109,7 +110,8 @@ if (process.env.ENV == 'inmemory') {
     CommentQuery,
     UserQuery,
     IterationQuery,
-    WorkItemQuery
+    WorkItemQuery,
+    AreaQuery
   ];
 }
 
