@@ -23,51 +23,12 @@ export const iterationReducer: ActionReducer<IterationState> =
         const parent = action.payload.parent;
         const newIterationId = action.payload.iteration.id;
         if (parent) {
-          // const parentIndex = state.findIndex(i => i.id === parent.id);
-          // if (parentIndex > -1) {
-          //   state[parentIndex].hasChildren = true;
-          // }
           state[parent.id].hasChildren = true
-          // if(state[parent.id].children) {
-          //   state[parent.id].children = [
-          //     action.payload.iteration,
-          //     ...state[parent.id].children
-          //   ];
-          // } else {
-          //   state[parent.id].children = [
-          //     action.payload.iteration
-          //   ];
-          // }
         }
         return { newIterationId: action.payload.iteration, ...state} ;
 
       case IterationActions.UPDATE_SUCCESS:
         const updatedIterationid = action.payload.id;
-        // for(let key in state) {
-        //   if(state[key].parentId === updatedIteration.id)
-        //     updatedIteration.children = [state[key], ...updatedIteration.children];
-        // }          
-        // const index = state.findIndex(i => i.id === updatedIteration.id);
-        // if (index > -1) {
-        //   updatedIteration.selected = state[index].selected;
-        //   state = [
-        //     ...state.slice(0, index),
-        //     updatedIteration,
-        //     ...state.slice(index + 1)
-        //   ]
-        //   const parentIndex = state.findIndex(i => i.id === updatedIteration.parentId);
-        //   if (parentIndex > -1 && state[parentIndex].children) {
-        //     const childIndex =
-        //       state[parentIndex].children.findIndex(i => i.id === updatedIteration.id);
-        //     if (childIndex > -1) {
-        //       state[parentIndex].children = [
-        //         ...state[parentIndex].children.slice(0, childIndex),
-        //         state[index],
-        //         ...state[parentIndex].children.slice(childIndex + 1)
-        //       ]
-        //     }
-        //   }
-        // }
         if(state[updatedIterationid])
           action.payload.selected = state[updatedIterationid].selected;
         state[updatedIterationid] = action.payload
@@ -75,20 +36,10 @@ export const iterationReducer: ActionReducer<IterationState> =
 
       case IterationActions.SELECT:
         if (state[action.payload]) {
-          // const itIndex = state.findIndex(
-          //   item => item.id === action.payload.id
-          // );
-          // if (itIndex > -1) {
-          //   for(let i = 0; i < state.length; i++) {
-          //     state[i].selected = i === itIndex;
-          //   }
-          // }
           for(let id in state) {
             state[id].selected =  id === action.payload;
             state[id].showChildren = false;
           }
-          // Expand all the parents
-          // let pId = state[itIndex].parentId;
           let pId = state[action.payload].parentId;
           while(pId) {
             const pIndex = pId;
@@ -96,13 +47,6 @@ export const iterationReducer: ActionReducer<IterationState> =
               state[pId].showChildren = true
               pId = state[pIndex].parentId;
             }
-            // state.findIndex(
-            //   item => item.id === pId
-            // );
-            // if (pIndex > -1) {
-            //   state[pIndex].showChildren = true;
-            //   pId = state[pIndex].parentId;
-            // }
           }
         } else {
           for(let i in state) {

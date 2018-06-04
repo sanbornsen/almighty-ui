@@ -268,18 +268,4 @@ export class IterationQuery {
         return iterations.filter((iteration: IterationUI) => iteration.isActive);
     });
   }
-
-  getIterationsForDropdown(iterationId: string) {
-    return this.getIterations()
-      .map((iterations: IterationUI[]) => {
-        return iterations.map((i: IterationUI) => {
-          return {
-            key: i.id,
-            value: (i.resolvedParentPath!='/'?i.resolvedParentPath:'') + '/' + i.name,
-            selected: i.id === iterationId,
-            cssLabelClass: undefined
-          }
-        })
-      })
-  }
 }

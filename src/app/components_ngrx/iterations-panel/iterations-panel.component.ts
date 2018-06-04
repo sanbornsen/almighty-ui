@@ -88,24 +88,11 @@ export class IterationComponent implements OnInit, OnDestroy, OnChanges {
         } else {
           console.log('[IterationComponent] Space deselected.');
           this.editEnabled = false;
-          this.allIterations = [];
-          // this.activeIterations = [];
-        }
+          this.allIterations = [];        }
       })
   }
 
   ngOnChanges() {
-    if (this.takeFromInput) {
-      // do not display the root iteration on the iteration panel.
-      this.allIterations = [];
-      for (let i=0; i<this.iterations.length; i++) {
-        if (!this.iterationService.isRootIteration(this.iterations[i].parentPath)) {
-          this.allIterations.push(this.iterations[i]);
-        }
-      }
-      this.clusterIterations();
-      // this.treeIterations = this.iterationService.getTopLevelIterations2(this.allIterations);
-    }
   }
 
   ngOnDestroy() {
@@ -155,18 +142,6 @@ export class IterationComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   getAndfilterIterations() {
-    if (this.takeFromInput) {
-      // do not display the root iteration on the iteration panel.
-      this.allIterations = [];
-      for (let i=0; i<this.iterations.length; i++) {
-        if (!this.iterationService.isRootIteration(this.iterations[i].parentPath)) {
-          this.allIterations.push(this.iterations[i]);
-        }
-      }
-      this.clusterIterations();
-      // this.treeIterations =
-            // this.iterationService.getTopLevelIterations2(this.allIterations);
-    } else {
       this.eventListeners.push(
         this.iterationQuery.getIterations()
           .filter(iterations => !!iterations.length)
@@ -175,9 +150,6 @@ export class IterationComponent implements OnInit, OnDestroy, OnChanges {
             this.allIterations = iterations.filter(i => {
               return !this.iterationService.isRootIteration(i.parentPath);
             });
-            this.clusterIterations();
-            // this.treeIterations =
-              // this.iterationService.getTopLevelIterations2(this.allIterations);
             if (!this.startedCheckingURL) {
               this.checkURL();
             }
@@ -186,11 +158,6 @@ export class IterationComponent implements OnInit, OnDestroy, OnChanges {
             console.log('Some error has occured', e);
           })
         );
-    }
-  }
-
-  clusterIterations() {
-    // this.activeIterations = this.iterationQuery.getActiveIterations();
   }
 
   updateItemCounts() {
