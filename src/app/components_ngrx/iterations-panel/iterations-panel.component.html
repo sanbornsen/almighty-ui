@@ -28,7 +28,7 @@
     [class.show]="sidePanelOpen"
     [class.hide]="!sidePanelOpen">
     <li class="active"
-      *ngFor="let iteration of activeIterations">
+      *ngFor="let iteration of activeIterations | async">
       <a
         [routerLinkActive]="'f8-itr--selected'"
         [routerLink]="[]" [attr.data-id]="iteration.id"
@@ -70,7 +70,7 @@
     [class.show]="sidePanelOpen"
     [class.hide]="!sidePanelOpen">
     <iteration-tree
-      [iterationList]="treeIterations"
+      [iterationList]="treeIterations | async"
       [collection]="collection"
       [witGroup]="witGroup"
       [showTree]="showTree"

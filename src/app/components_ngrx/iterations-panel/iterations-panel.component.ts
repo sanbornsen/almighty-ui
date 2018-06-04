@@ -50,8 +50,8 @@ export class IterationComponent implements OnInit, OnDestroy, OnChanges {
   selectedIteration: IterationUI;
   allIterations: IterationUI[] = [];
   eventListeners: any[] = [];
-  treeIterations: IterationUI[] = [];
-  activeIterations:IterationUI[] = [];
+  treeIterations: Observable<IterationUI[]> = this.iterationQuery.getIterationForTree();
+  activeIterations: Observable<IterationUI[]> = this.iterationQuery.getActiveIterations();
   spaceId: string = '';
   startedCheckingURL: boolean = false;
 
@@ -89,7 +89,7 @@ export class IterationComponent implements OnInit, OnDestroy, OnChanges {
           console.log('[IterationComponent] Space deselected.');
           this.editEnabled = false;
           this.allIterations = [];
-          this.activeIterations = [];
+          // this.activeIterations = [];
         }
       })
   }
@@ -104,7 +104,7 @@ export class IterationComponent implements OnInit, OnDestroy, OnChanges {
         }
       }
       this.clusterIterations();
-      this.treeIterations = this.iterationService.getTopLevelIterations2(this.allIterations);
+      // this.treeIterations = this.iterationService.getTopLevelIterations2(this.allIterations);
     }
   }
 
@@ -164,8 +164,8 @@ export class IterationComponent implements OnInit, OnDestroy, OnChanges {
         }
       }
       this.clusterIterations();
-      this.treeIterations =
-            this.iterationService.getTopLevelIterations2(this.allIterations);
+      // this.treeIterations =
+            // this.iterationService.getTopLevelIterations2(this.allIterations);
     } else {
       this.eventListeners.push(
         this.iterationQuery.getIterations()
@@ -176,8 +176,8 @@ export class IterationComponent implements OnInit, OnDestroy, OnChanges {
               return !this.iterationService.isRootIteration(i.parentPath);
             });
             this.clusterIterations();
-            this.treeIterations =
-              this.iterationService.getTopLevelIterations2(this.allIterations);
+            // this.treeIterations =
+              // this.iterationService.getTopLevelIterations2(this.allIterations);
             if (!this.startedCheckingURL) {
               this.checkURL();
             }
@@ -190,7 +190,7 @@ export class IterationComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   clusterIterations() {
-    this.activeIterations = this.allIterations.filter((iteration: IterationUI) => iteration.isActive);
+    // this.activeIterations = this.iterationQuery.getActiveIterations();
   }
 
   updateItemCounts() {
@@ -322,9 +322,9 @@ export class IterationComponent implements OnInit, OnDestroy, OnChanges {
           if (selectedIterationID !== undefined) {
             const selectedIteration =
               this.allIterations.find(it => it.id === selectedIterationID);
-            if (!selectedIteration.selected) {
-              this.store.dispatch(new IterationActions.Select(selectedIteration.id));
-            }
+            // if (!selectedIteration) {
+              this.store.dispatch(new IterationActions.Select(selectedIterationID));
+            // }
           } else {
             this.store.dispatch(new IterationActions.Select());
           }

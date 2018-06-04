@@ -68,12 +68,13 @@ export const iterationReducer: ActionReducer<IterationState> =
         //     }
         //   }
         // }
-        action.payload.selected = state[updatedIterationid].selected
+        if(state[updatedIterationid])
+          action.payload.selected = state[updatedIterationid].selected;
         state[updatedIterationid] = action.payload
         return {...state};
 
       case IterationActions.SELECT:
-        if (action.payload !== null) {
+        if (state[action.payload]) {
           // const itIndex = state.findIndex(
           //   item => item.id === action.payload.id
           // );
@@ -82,7 +83,10 @@ export const iterationReducer: ActionReducer<IterationState> =
           //     state[i].selected = i === itIndex;
           //   }
           // }
-          state[action.payload].selected = true;
+          for(let id in state) {
+            state[id].selected =  id === action.payload;
+            state[id].showChildren = false;
+          }
           // Expand all the parents
           // let pId = state[itIndex].parentId;
           let pId = state[action.payload].parentId;
