@@ -247,9 +247,9 @@
                   class="iteration-dropdown"
                   [allowUpdate]="!!loggedInUser"
                   [headerText]="'Update iteration'"
-                  [items]="iterations"
+                  [items]="iterationSource | async"
                   [noValueLabel]="'None'"
-                  [selectedItems]="selectedIterations"
+                  [selectedItems]="selectedIterations | async"
                   (onCloseSelector)="iterationUpdated($event)">
                 </common-selector>
               </div>

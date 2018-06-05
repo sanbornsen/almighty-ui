@@ -55,7 +55,12 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
     .select('listPage')
     .select('areas')
     .filter(a => !!a.length);
-  private iterationSource = this.iterationQuery.getIterations();
+  private iterationSource:Observable<{
+    key: string;
+    value: string;
+    selected: boolean;
+    cssLabelClass: undefined;
+  }[]>;
   private labelSource = this.store
     .select('listPage')
     .select('labels')
@@ -70,7 +75,7 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
     .filter(w => !!w.length);
 
   private combinedSources = Observable.combineLatest(
-    this.areaSource, this.iterationSource,
+    this.areaSource,
     this.labelSource, this.collaboratorSource,
     this.workItemStateSource, this.workItemTypeSource
   );
@@ -102,9 +107,13 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
   private _areas: AreaUI[] = [];
   private areas: any[] = []; // this goes in selector component
   private selectedAreas: any[] = []; // this goes in selector component
-  private _iterations: IterationUI[] = [];
-  private iterations: any[] = []; // this goes in selector component
-  private selectedIterations: any[] = []; // this goes in selector component
+  private iterations: Observable<any[]>; // this goes in selector component
+  private selectedIterations: Observable<{
+    key: string;
+    value: string;
+    selected: boolean;
+    cssLabelClass: undefined;
+  }[]>; // this goes in selector component
   private labels: LabelUI[] = [];
   private wiTypes: WorkItemTypeUI[] = [];
 
@@ -172,16 +181,19 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
   }
 
   setWorkItem(wiNumber: string | number) {
+    this.iterationSource = this.iterationQuery.getIterationsForWorkItem(wiNumber);
+    this.selectedIterations = this.iterationSource.map(iterations => {
+      return iterations.filter(i => i.selected);
+    })
     this.workItemSubscriber =
       this.spaceSource
       .switchMap(s => {
         return this.combinedSources
       })
-      .switchMap(([areas, iterations, labels, collabs, states, type]) => {
+      .switchMap(([areas, labels, collabs, states, type]) => {
         this.collaborators = collabs.filter(c => !c.currentUser);
         this.loggedInUser = collabs.find(c => c.currentUser);
         this._areas = areas;
-        this._iterations = iterations;
         this.labels = labels;
         this.wiTypes = type;
         return this.workItemQuery.getWorkItem(wiNumber);
@@ -197,7 +209,6 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
         const wiType = this.wiTypes.find(t => t.id === this.workItem.type.id);
         this.workItemStates = wiType.fields['system.state'].type.values;
         this.setAreas();
-        this.setIterations();
         this.loadingAssignees = false;
         this.loadingArea = false;
         this.loadingIteration = false;
@@ -330,18 +341,6 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
     this.store.dispatch(new WorkItemActions.Update(workItem));
   }
 
-  setIterations() {
-    this.iterations = this._iterations.map(i => {
-      return {
-        key: i.id,
-        value: (i.resolvedParentPath!='/'?i.resolvedParentPath:'') + '/' + i.name,
-        selected: i.id === this.workItem.iterationId,
-        cssLabelClass: undefined
-      }
-    });
-    this.selectedIterations = this.iterations.filter(i => i.selected);
-  }
-
   iterationUpdated(event) {
     const iterationID = event[0].key;
     this.loadingIteration = true;
@@ -351,7 +350,7 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
     workItem['id'] = this.workItem.id;
     workItem['type'] = this.workItem.type;
 
-    workItem['iteration'] = this._iterations.find(a => a.id === iterationID);
+    workItem['iterationId'] =  iterationID;
     this.store.dispatch(new WorkItemActions.Update(workItem));
   }
 
