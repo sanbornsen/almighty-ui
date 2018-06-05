@@ -47,11 +47,15 @@ export class IterationComponent implements OnInit, OnDestroy, OnChanges {
   loggedIn: boolean = true;
   editEnabled: boolean = false;
   barchatValue: number = 70;
-  // selectedIteration: IterationUI;
-  // allIterations: IterationUI[] = [];
   eventListeners: any[] = [];
   treeIterations: Observable<IterationUI[]> = 
-    this.iterationQuery.getIterationForTree();
+    this.iterationQuery.getIterationForTree()
+    .filter(i => !!i.length)
+    .do(i => {
+      if(!this.startedCheckingURL){
+        this.checkURL();
+      }
+    });
   activeIterations: Observable<IterationUI[]> = 
     this.iterationQuery.getActiveIterations();
   spaceId: string = '';
@@ -76,7 +80,6 @@ export class IterationComponent implements OnInit, OnDestroy, OnChanges {
     this.listenToEvents();
     this.loggedIn = this.auth.isLoggedIn();
     this.editEnabled = true;
-    // this.selectedIteration = {} as IterationUI;
     this.spaceSubscription = this.store
       .select('listPage')
       .select('space')
@@ -86,11 +89,9 @@ export class IterationComponent implements OnInit, OnDestroy, OnChanges {
           console.log('collection is ', this.collection);
           this.spaceId = space.id;
           this.editEnabled = true;
-          this.getAndfilterIterations();
         } else {
           console.log('[IterationComponent] Space deselected.');
           this.editEnabled = false;
-          // this.allIterations = [];        
         }
       })
   }
@@ -144,92 +145,7 @@ export class IterationComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  getAndfilterIterations() {
-      this.eventListeners.push(
-        this.iterationQuery.getIterations()
-          .filter(iterations => !!iterations.length)
-          .subscribe((iterations: IterationUI[]) => {
-            // do not display the root iteration on the iteration panel.
-            // this.allIterations = iterations.filter(i => {
-            //   return !this.iterationService.isRootIteration(i.parentPath);
-            // });
-            if (!this.startedCheckingURL) {
-              this.checkURL();
-            }
-          },
-          (e) => {
-            console.log('Some error has occured', e);
-          })
-        );
-  }
 
-  // updateItemCounts() {
-    // this.log.log('Updating item counts..');
-    // this.iterationService.getIterations().first().subscribe((updatedIterations: IterationUI[]) => {
-    //   // updating the counts from the response. May not the best solution on performance right now.
-    //   updatedIterations.forEach((thisIteration:IterationUI) => {
-    //     for (let i=0; i<this.iterations.length; i++) {
-    //       if (this.iterations[i].id === thisIteration.id) {
-    //         this.iterations[i].workItemTotalCount = thisIteration.workItemTotalCount;
-    //         this.iterations[i].workItemClosedCount = thisIteration.workItemClosedCount;
-    //       }
-    //     }
-    //   });
-    // }, err => console.log(err));
-  // }
-
-  // assignWIToIteration(workItemId: string, reqVersion: number, iterationID: string, selfLink: string) {
-  //   let workItemPayload: WorkItem = {
-  //     id: workItemId,
-  //     type: 'workitems',
-  //     attributes: {
-  //       'version': reqVersion
-  //     },
-  //     relationships: {
-  //       iteration: {
-  //         data: {
-  //           id: iterationID,
-  //           type: 'iteration'
-  //         }
-  //       }
-  //     },
-  //     links: {
-  //       self: selfLink
-  //     }
-  //   } as WorkItem;
-
-  //   this.workItemService.update(workItemPayload)
-  //     .switchMap(item => {
-  //       return this.iterationService.getIteration(item.relationships.iteration)
-  //         .map(iteration => {
-  //           item.relationships.iteration.data = iteration;
-  //           return item;
-  //         });
-  //     })
-  //     .subscribe(workItem => {
-  //       this.iterationService.emitDropWI(workItem);
-  //       this.updateItemCounts();
-  //       try {
-  //       this.notifications.message({
-  //           message: workItem.attributes['system.title']+' has been associated with '+workItem.relationships.iteration.data.attributes['name'],
-  //           type: NotificationType.SUCCESS
-  //         } as Notification);
-  //       } catch(error) {
-  //         console.log('Error in displaying notification. work item associated with iteration.');
-  //       }
-  //     },
-  //     (err) => {
-  //       this.iterationService.emitDropWI(workItemPayload, true);
-  //       try {
-  //         this.notifications.message({
-  //           message: 'Something went wrong. Please try again',
-  //           type: NotificationType.DANGER
-  //         } as Notification);
-  //       } catch(error) {
-  //         console.log('Error in displaying notification. Error in work item association with iteration.');
-  //       }
-  //     })
-  // }
 
   kebabMenuClick(event: Event) {
     event.stopPropagation();
@@ -248,12 +164,6 @@ export class IterationComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   listenToEvents() {
-    // this.eventListeners.push(
-    //   this.broadcaster.on<string>('backlog_selected')
-    //     .subscribe(message => {
-    //       this.selectedIteration = null;
-    //   })
-    // );
     this.eventListeners.push(
       this.broadcaster.on<string>('logout')
         .subscribe(message => {
@@ -261,25 +171,6 @@ export class IterationComponent implements OnInit, OnDestroy, OnChanges {
           this.authUser = null;
       })
     );
-    // this.eventListeners.push(
-    //   this.broadcaster.on<string>('wi_change_state_it')
-    //     .subscribe((actions: any) => {
-    //       // this.updateItemCounts();
-    //   })
-    // );
-    // this.eventListeners.push(
-    //   this.broadcaster.on<string>('associate_iteration')
-    //     .subscribe((data: any) => {
-    //       // this.updateItemCounts();
-    //   })
-    // );
-
-    // this.eventListeners.push(
-    //   this.broadcaster.on<WorkItem>('create_workitem')
-    //     .subscribe((data: WorkItem) => {
-    //       // this.updateItemCounts();
-    //   })
-    // );
   }
 
   checkURL() {
@@ -290,11 +181,7 @@ export class IterationComponent implements OnInit, OnDestroy, OnChanges {
           const selectedIterationID =
             this.filterService.getConditionFromQuery(val.q, 'iteration');
           if (selectedIterationID !== undefined) {
-            // const selectedIteration =
-            //   this.allIterations.find(it => it.id === selectedIterationID);
-            // if (!selectedIteration) {
-              this.store.dispatch(new IterationActions.Select(selectedIterationID));
-            // }
+            this.store.dispatch(new IterationActions.Select(selectedIterationID));
           } else {
             this.store.dispatch(new IterationActions.Select());
           }

@@ -70,7 +70,7 @@
     [class.show]="sidePanelOpen"
     [class.hide]="!sidePanelOpen">
     <iteration-tree
-      [iterationList]="treeIterations | async"
+      [iterationList]="(treeIterations | async) === null ? [] : (treeIterations | async)"
       [collection]="collection"
       [witGroup]="witGroup"
       [showTree]="showTree"
