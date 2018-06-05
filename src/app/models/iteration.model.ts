@@ -7,8 +7,8 @@ import {
   CommonSelectorUI
 } from './common.model';
 import { Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { AppState } from '../states/app.state';
+import { Store, createFeatureSelector, createSelector } from '@ngrx/store';
+import { AppState, ListPage } from '../states/app.state';
 import { Observable } from 'rxjs';
 import  {IterationService as Service} from './../services/iteration.service'
 import { iterationUiReducer } from '../reducers/iteration-reducer';
@@ -215,9 +215,12 @@ export class IterationMapper implements Mapper<IterationModel, IterationUI> {
 
 @Injectable()
 export class IterationQuery {
-  private iterationSource = this.store
-    .select(state => state.listPage)
-    .select(state => state.iterations);
+  private listPageSelector = createFeatureSelector<ListPage>('listPage');
+  private iterationSelector = createSelector(
+    this.listPageSelector,
+    (state) => state.iterations
+  );
+  private iterationSource = this.store.select(this.iterationSelector);
 
   constructor(private store: Store<AppState>,
     private iterationService: Service,
