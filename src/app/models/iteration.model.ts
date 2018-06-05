@@ -11,6 +11,7 @@ import { AppState } from '../states/app.state';
 import { Observable } from 'rxjs';
 import  {IterationService as Service} from './../services/iteration.service'
 import { iterationUiReducer } from '../reducers/iteration-reducer';
+import { WorkItemQuery } from './work-item';
 
 export class IterationModel extends modelService {
   attributes?: IterationAttributes;
@@ -218,7 +219,8 @@ export class IterationQuery {
     .select(state => state.iterations);
 
   constructor(private store: Store<AppState>,
-     private iterationService: Service) {}
+    private iterationService: Service,
+    private workItemQuery: WorkItemQuery) {}
 
   getIterations(): Observable<IterationUI[]> {
     return this.iterationSource.map(iterations => {
@@ -267,5 +269,27 @@ export class IterationQuery {
       .map((iterations: IterationUI[]) => {
         return iterations.filter((iteration: IterationUI) => iteration.isActive);
     });
+  }
+
+  getIterationsForWorkItem(number: string | number): Observable<{
+    key: string;
+    value: string;
+    selected: boolean;
+    cssLabelClass: undefined;
+  }[]> {
+    return this.workItemQuery.getWorkItem(number)
+      .filter(w => !!w)
+      .switchMap(workitem => {
+        return this.getIterations().map(iterations => {
+          return iterations.map(i => {
+            return {
+              key: i.id,
+              value: (i.resolvedParentPath!='/'?i.resolvedParentPath:'') + '/' + i.name,
+              selected: i.id === workitem.iterationId,
+              cssLabelClass: undefined
+            }
+          })
+        });
+      })
   }
 }
