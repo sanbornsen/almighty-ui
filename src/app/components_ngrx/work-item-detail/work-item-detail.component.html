@@ -225,8 +225,8 @@
                   [allowUpdate]="!!loggedInUser"
                   [noValueLabel]="'None'"
                   [headerText]="'Update area'"
-                  [items]="areas"
-                  [selectedItems]="selectedAreas"
+                  [items]="areaSource | async"
+                  [selectedItems]="selectedAreas | async"
                   (onCloseSelector)="areaUpdated($event)">
                 </common-selector>
               </div>

@@ -47,7 +47,6 @@ export class WorkItemEffects {
         }
       }
       const workItemResolver = new WorkItemResolver(workItemUI);
-      workItemResolver.resolveArea(state.areas);
       workItemResolver.resolveType(state.workItemTypes);
       workItemResolver.resolveWiLabels(state.labels);
       let wiu = workItemResolver.getWorkItem();
@@ -75,7 +74,6 @@ export class WorkItemEffects {
         .map(item => {
           const itemUI = this.workItemMapper.toUIModel(item);
           const workItemResolver = new WorkItemResolver(itemUI);
-          workItemResolver.resolveArea(state.areas);
           workItemResolver.resolveType(state.workItemTypes);
           const wItem = workItemResolver.getWorkItem();
           let wid = this.workItemMapper.toDynamicUIModel(

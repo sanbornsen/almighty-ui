@@ -4,11 +4,14 @@ import {
   Mapper,
   MapTree,
   switchModel,
+  CommonSelectorUI,
 } from './common.model';
 import { Injectable } from '@angular/core';
 import { Store, createFeatureSelector, createSelector } from '@ngrx/store';
 import { AppState, ListPage } from '../states/app.state';
 import { Observable } from 'rxjs';
+import { WorkItem } from '../..';
+import { WorkItemQuery } from './work-item';
 export class AreaModel extends modelService {
   attributes?: AreaAttributes;
   links?: AreaLinks;
@@ -106,12 +109,35 @@ export class AreaQuery {
   );
   private areaSource = this.store.select(this.areaSelector);
 
-  constructor(private store: Store<AppState>) {
+  constructor(private store: Store<AppState>,
+    private workItemQuery: WorkItemQuery) {
   }
 
   getAreas(): Observable<AreaUI[]> {
     return this.areaSource.map(areas => {
       return Object.keys(areas).map(id => areas[id]);
     })
+  }
+
+  getAreaObservableById(id: string):Observable<AreaUI> {
+    return this.areaSource.select(areas => areas[id]);
+  }
+
+  getAreasForWorkItem(number: string | number): Observable<CommonSelectorUI[]> {
+    return this.workItemQuery.getWorkItem(number)
+      .filter(w => !!w)
+      .switchMap(workItem => {
+        return this.getAreas()
+          .map(areas => {
+            return areas.map(area => {
+              return {
+                key: area.id,
+                value: (area.parentPathResolved!='/'?area.parentPathResolved:'') + '/' + area.name,
+                selected: area.id === workItem.areaId,
+                cssLabelClass: undefined
+              }
+            })
+          })
+      })
   }
 }

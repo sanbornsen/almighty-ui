@@ -8,7 +8,7 @@ import {
   WorkItemTypeUI,
   WorkItemTypeMapper
 } from './work-item-type';
-import { AreaModel, AreaUI, AreaMapper, AreaService } from './area.model';
+import { AreaModel, AreaUI, AreaMapper, AreaService, AreaQuery } from './area.model';
 import { Comments, Comment, CommentUI, CommentMapper } from './comment';
 import { Link } from './link';
 import { IterationModel, IterationUI, IterationMapper, IterationService } from './iteration.model';
@@ -132,7 +132,8 @@ export interface WorkItemUI {
   order: number;
   dynamicfields?: any;
 
-  area: AreaUI;
+  areaId: string;
+  areaObs: Observable<AreaUI>;
   iterationId: string;
   iterationObs?: Observable<IterationUI>;
   assignees: string[];
@@ -205,9 +206,8 @@ export class WorkItemMapper implements Mapper<WorkItemService, WorkItemUI> {
       fromPath: ['relationships','workItemLinks', 'links', 'related'],
       toPath: ['WILinkUrl']
     }, {
-      fromPath: ['relationships','area','data'],
-      toPath: ['area'],
-      toFunction: this.areaMapper.toUIModel.bind(this.areaMapper)
+      fromPath: ['relationships','area','data', 'id'],
+      toPath: ['areaId'],
     }, {
       fromPath: ['relationships','creator','data', 'id'],
       toPath: ['creator']
@@ -313,10 +313,12 @@ export class WorkItemMapper implements Mapper<WorkItemService, WorkItemUI> {
       fromPath: ['WILinkUrl'],
       toPath: ['relationships','workItemLinks', 'links', 'related']
     }, {
-      fromPath: ['area'],
-      toPath: ['relationships','area','data'],
-      toFunction: this.areaMapper.toServiceModel.bind(this.areaMapper)
+      fromPath: ['areaId'],
+      toPath: ['relationships','area','data', 'id']
     }, {
+      toPath: ['relationships','area','data', 'type'],
+      toValue: 'areas'
+    },{
       fromPath: ['creator'],
       toPath: ['relationships','creator','data', 'id'],
     }, {
@@ -324,10 +326,13 @@ export class WorkItemMapper implements Mapper<WorkItemService, WorkItemUI> {
       toValue: 'identities'
     }, {
       fromPath: ['iterationId'],
-      toPath: ['relationships','iteration','data', 'id'],
-    }, {
-      fromPath: ['relationships','iteration','data', 'type'],
-      toValue: 'iterations'
+      toPath: ['relationships','iteration','data'],
+      toFunction: (id: string) => {
+        return {
+          id: id,
+          type: 'iterations'
+        }
+      }
     }, {
       fromPath: ['type'],
       toPath: ['relationships','baseType','data'],
@@ -442,13 +447,6 @@ export class WorkItemMapper implements Mapper<WorkItemService, WorkItemUI> {
 export class WorkItemResolver {
   constructor(private workItem: WorkItemUI) {}
 
-  resolveArea(areas: AreaUI[]) {
-    const area = areas.find(a => a.id === this.workItem.area.id);
-    if (area) {
-      this.workItem.area = cloneDeep(area);
-    }
-  }
-
   resolveType(types: WorkItemTypeUI[]) {
     const type = types.find(t => t.id === this.workItem.type.id);
     if (type) {
@@ -485,7 +483,8 @@ export class WorkItemQuery {
           ...workItem,
           creatorObs: this.userQuery.getUserObservableById(workItem.creator),
           assigneesObs: this.userQuery.getUserObservablesByIds(workItem.assignees),
-          iterationObs: this.store.select('listPage').select('iterations').select(workItem.iterationId)
+          iterationObs: this.store.select('listPage').select('iterations').select(workItem.iterationId),
+          areaObs: this.store.select('listPage').select('areas').select(state => state[workItem.areaId])
         };
       });
     })
@@ -502,7 +501,8 @@ export class WorkItemQuery {
         ...workItem,
         creatorObs: this.userQuery.getUserObservableById(workItem.creator),
         assigneesObs: this.userQuery.getUserObservablesByIds(workItem.assignees),
-        iterationObs: this.store.select('listPage').select('iterations').select(workItem.iterationId)
+        iterationObs: this.store.select('listPage').select('iterations').select(workItem.iterationId),
+        areaObs: this.store.select('listPage').select('areas').select(state => state[workItem.areaId])
       }
     });
   }

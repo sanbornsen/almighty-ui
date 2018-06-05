@@ -56,6 +56,7 @@ import { IterationQuery } from '../../models/iteration.model';
 
 import { WorkItemQuery } from './../../models/work-item';
 import { CommentQuery } from './../../models/comment';
+import { AreaQuery } from '../../models/area.model';
 
 @NgModule({
   imports: [
@@ -115,7 +116,8 @@ import { CommentQuery } from './../../models/comment';
     TooltipConfig,
     WorkItemTypeControlService,
     IterationQuery,
-    WorkItemQuery
+    WorkItemQuery,
+    AreaQuery
   ],
   declarations: [
     WorkItemDetailComponent,

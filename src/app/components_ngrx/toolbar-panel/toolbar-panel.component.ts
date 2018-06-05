@@ -112,7 +112,6 @@ export class ToolbarPanelComponent implements OnInit, AfterViewInit, OnDestroy {
     value: 'Loading...',
     iconStyleClass: 'fa fa-spinner'
   };
-  private areaData: Observable<AreaUI[]>;
   private workItemTypeData: Observable<WorkItemTypeUI[]>;
   private stateData: Observable<string[]>;
   private labelData: Observable<LabelUI[]>;
@@ -214,7 +213,7 @@ export class ToolbarPanelComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.eventListeners.push(
       Observable.combineLatest(
-        this.areaData,
+        this.areaQuery.getAreas(),
         this.userQuery.getCollaborators(),
         this.workItemTypeData,
         this.stateData,
@@ -357,8 +356,6 @@ export class ToolbarPanelComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
   initiateDataSources() {
-    this.areaData = this.areaQuery.getAreas()
-      .filter(a =>!!a.length);
     this.workItemTypeData = this.store
       .select('listPage').select('workItemTypes')
       .filter(a =>!!a.length);
@@ -373,7 +370,8 @@ export class ToolbarPanelComponent implements OnInit, AfterViewInit, OnDestroy {
     this.filterData = this.store
       .select('toolbar').select('filters')
       .filter(filters => !!filters.length);
-    this.iterationData = this.iterationQuery.getIterations();
+    this.iterationData = this.iterationQuery.getIterations()
+      .filter(i => !!i.length)
     this.groupTypeData = this.store
       .select('listPage').select('groupTypes')
       .filter(i => !!i.length)
@@ -382,7 +380,7 @@ export class ToolbarPanelComponent implements OnInit, AfterViewInit, OnDestroy {
   getFilterMap() {
     return {
       area: {
-        datasource: this.areaData,
+        datasource: this.areaQuery.getAreas(),
         datamap: (areas: AreaUI[]) => {
           return {
             queries: areas.map(area => {return {id: area.id, value: area.name}}),
@@ -514,7 +512,7 @@ export class ToolbarPanelComponent implements OnInit, AfterViewInit, OnDestroy {
 
   formatFilterFIelds(fields) {
     Observable.combineLatest(
-      this.areaData,
+      this.areaQuery.getAreas(),
       this.userQuery.getCollaborators(),
       this.workItemTypeData,
       this.stateData,
