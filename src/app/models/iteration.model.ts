@@ -3,7 +3,8 @@ import {
   modelService,
   Mapper,
   MapTree,
-  switchModel
+  switchModel,
+  CommonSelectorUI
 } from './common.model';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
@@ -271,12 +272,7 @@ export class IterationQuery {
     });
   }
 
-  getIterationsForWorkItem(number: string | number): Observable<{
-    key: string;
-    value: string;
-    selected: boolean;
-    cssLabelClass: undefined;
-  }[]> {
+  getIterationsForWorkItem(number: string | number): Observable<CommonSelectorUI[]> {
     return this.workItemQuery.getWorkItem(number)
       .filter(w => !!w)
       .switchMap(workitem => {
