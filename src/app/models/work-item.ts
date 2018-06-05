@@ -323,9 +323,11 @@ export class WorkItemMapper implements Mapper<WorkItemService, WorkItemUI> {
       toPath: ['relationships','creator','data', 'type'],
       toValue: 'identities'
     }, {
-      fromPath: ['iteration'],
-      toPath: ['relationships','iteration','data'],
-      toFunction: this.itMapper.toServiceModel.bind(this.itMapper)
+      fromPath: ['iterationId'],
+      toPath: ['relationships','iteration','data', 'id'],
+    }, {
+      fromPath: ['relationships','iteration','data', 'type'],
+      toValue: 'iterations'
     }, {
       fromPath: ['type'],
       toPath: ['relationships','baseType','data'],
@@ -446,15 +448,6 @@ export class WorkItemResolver {
       this.workItem.area = cloneDeep(area);
     }
   }
-
-  // resolveIteration(iterations: IterationUI[]) {
-  //   const iteration = this.iterationQuery.getIterations().find(it => it.id === this.workItem.iteration.id);
-  //   if (iteration) {
-  //     this.workItem.iteration = cloneDeep(iteration);
-  //     // We don't need this much value for a work item
-  //     this.workItem.iteration.children = [];
-  //   }
-  // }
 
   resolveType(types: WorkItemTypeUI[]) {
     const type = types.find(t => t.id === this.workItem.type.id);
