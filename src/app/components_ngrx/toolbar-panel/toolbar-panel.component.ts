@@ -30,7 +30,7 @@ import {
 } from 'ngx-login-client';
 import { Space } from 'ngx-fabric8-wit';
 
-import { AreaUI } from '../../models/area.model';
+import { AreaUI, AreaQuery } from '../../models/area.model';
 import { FilterModel } from '../../models/filter.model';
 import { FilterService } from '../../services/filter.service';
 import { LabelUI } from './../../models/label.model';
@@ -144,7 +144,8 @@ export class ToolbarPanelComponent implements OnInit, AfterViewInit, OnDestroy {
     private store: Store<AppState>,
     private cdr: ChangeDetectorRef,
     private iterationQuery: IterationQuery,
-    private userQuery: UserQuery) {
+    private userQuery: UserQuery,
+    private areaQuery: AreaQuery) {
   }
 
   ngOnInit() {
@@ -356,8 +357,7 @@ export class ToolbarPanelComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
   initiateDataSources() {
-    this.areaData = this.store
-      .select('listPage').select('areas')
+    this.areaData = this.areaQuery.getAreas()
       .filter(a =>!!a.length);
     this.workItemTypeData = this.store
       .select('listPage').select('workItemTypes')
