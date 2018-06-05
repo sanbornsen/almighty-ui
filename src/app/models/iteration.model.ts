@@ -240,7 +240,7 @@ export class IterationQuery {
       .map(iterations => {
         if (iterations.length === 1) {
           return iterations[0];
-        } return {} as IterationUI;
+        } return null;
       });
   }
 
