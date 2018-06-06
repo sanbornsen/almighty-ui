@@ -3,8 +3,16 @@ import {
   modelService,
   Mapper,
   MapTree,
-  switchModel
+  switchModel,
+  CommonSelectorUI
 } from './common.model';
+import { Injectable } from '@angular/core';
+import { Store, createFeatureSelector, createSelector } from '@ngrx/store';
+import { AppState, ListPage } from '../states/app.state';
+import { Observable } from 'rxjs';
+import  {IterationService as Service} from './../services/iteration.service'
+import { iterationUiReducer } from '../reducers/iteration-reducer';
+import { WorkItemQuery } from './work-item';
 
 export class IterationModel extends modelService {
   attributes?: IterationAttributes;
@@ -202,5 +210,85 @@ export class IterationMapper implements Mapper<IterationModel, IterationUI> {
     return switchModel<IterationUI, IterationService>(
       arg, this.uiToServiceMapTree
     );
+  }
+}
+
+@Injectable()
+export class IterationQuery {
+  private listPageSelector = createFeatureSelector<ListPage>('listPage');
+  private iterationSelector = createSelector(
+    this.listPageSelector,
+    (state) => state.iterations
+  );
+  private iterationSource = this.store.select(this.iterationSelector);
+
+  constructor(private store: Store<AppState>,
+    private iterationService: Service,
+    private workItemQuery: WorkItemQuery) {}
+
+  getIterations(): Observable<IterationUI[]> {
+    return this.iterationSource.map(iterations => {
+      return Object.keys(iterations).map(id => iterations[id]);
+    });
+  }
+
+  getIterationByIdObservable(id: string): Observable<IterationUI> {
+    return this.iterationSource.select(state => state[id]);
+  }
+
+  getSelectedIteration(): Observable<IterationUI> {
+    return this.getIterations()
+      .map((iterations: IterationUI[]) => {
+        return iterations.filter(it => it.selected)
+      })
+      .map(iterations => {
+        if (iterations.length === 1) {
+          return iterations[0];
+        } return null;
+      });
+  }
+
+  getIterationsWithChildren(): Observable<IterationUI[]> {
+    return this.getIterations()
+      .map(iterations => {
+        for(let i = 0; i < iterations.length; i++) {
+          iterations[i].children = iterations.filter(it => it.parentId === iterations[i].id);
+        }
+        let allIterations = iterations.filter((i: IterationUI) => {
+          return !this.iterationService.isRootIteration(i.parentPath)
+        })
+        return allIterations;
+      })
+  }
+
+  getIterationForTree(): Observable<IterationUI[]> {
+    return this.getIterationsWithChildren().
+      map((iterations: IterationUI[]) => {
+        return this.iterationService.getTopLevelIterations2(iterations);
+      })
+  }
+
+  getActiveIterations(): Observable<IterationUI[]> {
+    return this.getIterations()
+      .map((iterations: IterationUI[]) => {
+        return iterations.filter((iteration: IterationUI) => iteration.isActive);
+    });
+  }
+
+  getIterationsForWorkItem(number: string | number): Observable<CommonSelectorUI[]> {
+    return this.workItemQuery.getWorkItem(number)
+      .filter(w => !!w)
+      .switchMap(workitem => {
+        return this.getIterations().map(iterations => {
+          return iterations.map(i => {
+            return {
+              key: i.id,
+              value: (i.resolvedParentPath!='/'?i.resolvedParentPath:'') + '/' + i.name,
+              selected: i.id === workitem.iterationId,
+              cssLabelClass: undefined
+            }
+          })
+        });
+      })
   }
 }

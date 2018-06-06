@@ -1,8 +1,8 @@
 import { WorkItemTypeControlService } from './../../services/work-item-type-control.service';
 import { FormGroup } from '@angular/forms';
 import { LabelUI, LabelQuery } from './../../models/label.model';
-import { IterationUI } from './../../models/iteration.model';
-import { AreaUI } from './../../models/area.model';
+import { IterationUI, IterationQuery } from './../../models/iteration.model';
+import { AreaUI, AreaQuery } from './../../models/area.model';
 import { UserUI, UserQuery } from './../../models/user';
 import { WorkItemTypeUI } from './../../models/work-item-type';
 import { AuthenticationService } from 'ngx-login-client';
@@ -34,6 +34,7 @@ import * as AreaActions from './../../actions/area.actions';
 import * as WorkItemTypeActions from './../../actions/work-item-type.actions';
 import * as LabelActions from './../../actions/label.actions';
 import { WorkItemService } from './../../services/work-item.service';
+import { CommonSelectorUI } from '../../models/common.model';
 
 @Component({
   selector: 'work-item-detail',
@@ -51,15 +52,9 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
     .select('space')
     .do(s => {if (!s) this.store.dispatch(new SpaceActions.Get())})
     .filter(s => !!s);
-  private areaSource = this.store
-    .select('listPage')
-    .select('areas')
-    .filter(a => !!a.length);
-  private iterationSource = this.store
-    .select('listPage')
-    .select('iterations')
-    .filter(i => !!i.length);
   private labelSource = this.labelQuery.getLables();
+  private areaSource: Observable<CommonSelectorUI[]>;
+  private iterationSource: Observable<CommonSelectorUI[]>;
   private collaboratorSource = this.userQuery.getCollaborators();
   private workItemStateSource = this.store
     .select('listPage')
@@ -71,7 +66,6 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
     .filter(w => !!w.length);
 
   private combinedSources = Observable.combineLatest(
-    this.areaSource, this.iterationSource,
     this.labelSource, this.collaboratorSource,
     this.workItemStateSource, this.workItemTypeSource
   );
@@ -102,10 +96,9 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
   private descCallback = null;
   private _areas: AreaUI[] = [];
   private areas: any[] = []; // this goes in selector component
-  private selectedAreas: any[] = []; // this goes in selector component
-  private _iterations: IterationUI[] = [];
-  private iterations: any[] = []; // this goes in selector component
-  private selectedIterations: any[] = []; // this goes in selector component
+  private selectedAreas: Observable<CommonSelectorUI[]>; // this goes in selector component
+  private iterations: Observable<any[]>; // this goes in selector component
+  private selectedIterations: Observable<CommonSelectorUI[]>; // this goes in selector component
   private labels: LabelUI[] = [];
   private wiTypes: WorkItemTypeUI[] = [];
 
@@ -131,9 +124,11 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
     private workItemService: WorkItemService,
     private workItemTypeControlService: WorkItemTypeControlService,
     private sanitizer: DomSanitizer,
+    private iterationQuery: IterationQuery,
     private userQuery: UserQuery,
     private labelQuery: LabelQuery,
-    private workItemQuery: WorkItemQuery
+    private workItemQuery: WorkItemQuery,
+    private areaQuery: AreaQuery
   ) {
 
   }
@@ -173,16 +168,18 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
   }
 
   setWorkItem(wiNumber: string | number) {
+    this.iterationSource = this.iterationQuery.getIterationsForWorkItem(wiNumber);
+    this.selectedIterations = this.getSelectedItems(this.iterationSource);
+    this.areaSource = this.areaQuery.getAreasForWorkItem(wiNumber);
+    this.selectedAreas = this.getSelectedItems(this.areaSource);
     this.workItemSubscriber =
       this.spaceSource
       .switchMap(s => {
         return this.combinedSources
       })
-      .switchMap(([areas, iterations, labels, collabs, states, type]) => {
+      .switchMap(([labels, collabs, states, type]) => {
         this.collaborators = collabs.filter(c => !c.currentUser);
         this.loggedInUser = collabs.find(c => c.currentUser);
-        this._areas = areas;
-        this._iterations = iterations;
         this.labels = labels;
         this.wiTypes = type;
         this.store.dispatch(new DetailWorkItemActions.GetWorkItem({
@@ -200,8 +197,6 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
         this.workItem = workItem;
         const wiType = this.wiTypes.find(t => t.id === this.workItem.type.id);
         this.workItemStates = wiType.fields['system.state'].type.values;
-        this.setAreas();
-        this.setIterations();
         this.loadingAssignees = false;
         this.loadingArea = false;
         this.loadingIteration = false;
@@ -240,6 +235,13 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
           this.descCallback = null;
         }
       });
+  }
+
+  getSelectedItems(itemSource: Observable<CommonSelectorUI[]>)
+    :Observable<CommonSelectorUI[]> {
+    return itemSource.map(items => {
+      return items.filter(i => i.selected)
+    })
   }
 
   closeDetail() {
@@ -310,18 +312,6 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
     this.store.dispatch(new WorkItemActions.Update(workItem));
   }
 
-  setAreas() {
-    this.areas = this._areas.map(a => {
-      return {
-        key: a.id,
-        value: (a.parentPathResolved!='/'?a.parentPathResolved:'') + '/' + a.name,
-        selected: a.id === this.workItem.area.id,
-        cssLabelClass: undefined
-      }
-    });
-    this.selectedAreas = this.areas.filter(a => a.selected);
-  }
-
   areaUpdated(event) {
     const areaID = event[0].key;
     this.loadingArea = true;
@@ -330,20 +320,8 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
     workItem['link'] = this.workItem.link;
     workItem['id'] = this.workItem.id;
     workItem['type'] = this.workItem.type;
-    workItem['area'] = this._areas.find(a => a.id === areaID);
+    workItem['areaId'] = areaID;
     this.store.dispatch(new WorkItemActions.Update(workItem));
-  }
-
-  setIterations() {
-    this.iterations = this._iterations.map(i => {
-      return {
-        key: i.id,
-        value: (i.resolvedParentPath!='/'?i.resolvedParentPath:'') + '/' + i.name,
-        selected: i.id === this.workItem.iteration.id,
-        cssLabelClass: undefined
-      }
-    });
-    this.selectedIterations = this.iterations.filter(i => i.selected);
   }
 
   iterationUpdated(event) {
@@ -355,7 +333,7 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
     workItem['id'] = this.workItem.id;
     workItem['type'] = this.workItem.type;
 
-    workItem['iteration'] = this._iterations.find(a => a.id === iterationID);
+    workItem['iterationId'] =  iterationID;
     this.store.dispatch(new WorkItemActions.Update(workItem));
   }
 

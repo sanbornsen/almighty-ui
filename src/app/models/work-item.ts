@@ -8,7 +8,7 @@ import {
   WorkItemTypeUI,
   WorkItemTypeMapper
 } from './work-item-type';
-import { AreaModel, AreaUI, AreaMapper, AreaService } from './area.model';
+import { AreaModel, AreaUI, AreaMapper, AreaService, AreaQuery } from './area.model';
 import { Comments, Comment, CommentUI, CommentMapper } from './comment';
 import { Link } from './link';
 import { IterationModel, IterationUI, IterationMapper, IterationService } from './iteration.model';
@@ -22,6 +22,7 @@ import {
   switchModel,
   cleanObject
 } from './common.model';
+//import {IterationQuery} from './iteration.model';
 
 export class WorkItem extends modelService {
   hasChildren?: boolean;
@@ -131,8 +132,10 @@ export interface WorkItemUI {
   order: number;
   dynamicfields?: any;
 
-  area: AreaUI;
-  iteration: IterationUI;
+  areaId: string;
+  areaObs: Observable<AreaUI>;
+  iterationId: string;
+  iterationObs?: Observable<IterationUI>;
   assignees: string[];
   assigneesObs?: Observable<UserUI[]>;
   creator: string;
@@ -203,16 +206,14 @@ export class WorkItemMapper implements Mapper<WorkItemService, WorkItemUI> {
       fromPath: ['relationships','workItemLinks', 'links', 'related'],
       toPath: ['WILinkUrl']
     }, {
-      fromPath: ['relationships','area','data'],
-      toPath: ['area'],
-      toFunction: this.areaMapper.toUIModel.bind(this.areaMapper)
+      fromPath: ['relationships','area','data', 'id'],
+      toPath: ['areaId'],
     }, {
       fromPath: ['relationships','creator','data', 'id'],
       toPath: ['creator']
     }, {
-      fromPath: ['relationships','iteration','data'],
-      toPath: ['iteration'],
-      toFunction: this.itMapper.toUIModel.bind(this.itMapper)
+      fromPath: ['relationships','iteration','data', 'id'],
+      toPath: ['iterationId']
     }, {
       fromPath: ['relationships','baseType','data'],
       toPath: ['type'],
@@ -312,19 +313,26 @@ export class WorkItemMapper implements Mapper<WorkItemService, WorkItemUI> {
       fromPath: ['WILinkUrl'],
       toPath: ['relationships','workItemLinks', 'links', 'related']
     }, {
-      fromPath: ['area'],
-      toPath: ['relationships','area','data'],
-      toFunction: this.areaMapper.toServiceModel.bind(this.areaMapper)
+      fromPath: ['areaId'],
+      toPath: ['relationships','area','data', 'id']
     }, {
+      toPath: ['relationships','area','data', 'type'],
+      toValue: 'areas'
+    },{
       fromPath: ['creator'],
       toPath: ['relationships','creator','data', 'id'],
     }, {
       toPath: ['relationships','creator','data', 'type'],
       toValue: 'identities'
     }, {
-      fromPath: ['iteration'],
+      fromPath: ['iterationId'],
       toPath: ['relationships','iteration','data'],
-      toFunction: this.itMapper.toServiceModel.bind(this.itMapper)
+      toFunction: (id: string) => {
+        return {
+          id: id,
+          type: 'iterations'
+        }
+      }
     }, {
       fromPath: ['type'],
       toPath: ['relationships','baseType','data'],
@@ -439,22 +447,6 @@ export class WorkItemMapper implements Mapper<WorkItemService, WorkItemUI> {
 export class WorkItemResolver {
   constructor(private workItem: WorkItemUI) {}
 
-  resolveArea(areas: AreaUI[]) {
-    const area = areas.find(a => a.id === this.workItem.area.id);
-    if (area) {
-      this.workItem.area = cloneDeep(area);
-    }
-  }
-
-  resolveIteration(iterations: IterationUI[]) {
-    const iteration = iterations.find(it => it.id === this.workItem.iteration.id);
-    if (iteration) {
-      this.workItem.iteration = cloneDeep(iteration);
-      // We don't need this much value for a work item
-      this.workItem.iteration.children = [];
-    }
-  }
-
   resolveType(types: WorkItemTypeUI[]) {
     const type = types.find(t => t.id === this.workItem.type.id);
     if (type) {
@@ -472,8 +464,6 @@ export class WorkItemResolver {
     return this.workItem;
   }
 }
-
-
 
 @Injectable()
 export class WorkItemQuery {
@@ -496,7 +486,9 @@ export class WorkItemQuery {
         return {
           ...workItem,
           creatorObs: this.userQuery.getUserObservableById(workItem.creator),
-          assigneesObs: this.userQuery.getUserObservablesByIds(workItem.assignees)
+          assigneesObs: this.userQuery.getUserObservablesByIds(workItem.assignees),
+          iterationObs: this.store.select('listPage').select('iterations').select(workItem.iterationId),
+          areaObs: this.store.select('listPage').select('areas').select(state => state[workItem.areaId])
         };
       });
     })
@@ -509,7 +501,9 @@ export class WorkItemQuery {
       return {
         ...workItem,
         creatorObs: this.userQuery.getUserObservableById(workItem.creator),
-        assigneesObs: this.userQuery.getUserObservablesByIds(workItem.assignees)
+        assigneesObs: this.userQuery.getUserObservablesByIds(workItem.assignees),
+        iterationObs: this.store.select('listPage').select('iterations').select(workItem.iterationId),
+        areaObs: this.store.select('listPage').select('areas').select(state => state[workItem.areaId])
       }
     });
   }

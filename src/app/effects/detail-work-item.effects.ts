@@ -48,8 +48,9 @@ export class DetailWorkItemEffects {
         }
       }
       const workItemResolver = new WorkItemResolver(workItemUI);
-      workItemResolver.resolveArea(state.areas);
-      workItemResolver.resolveIteration(state.iterations);
+      // workItemResolver.resolveArea(state.areas);
+      //workItemResolver.resolveIteration(state.iterations);
+      //workItemResolver.resolveCreator(state.collaborators);
       workItemResolver.resolveType(state.workItemTypes);
       workItemResolver.resolveWiLabels(state.labels);
       const wItem = workItemResolver.getWorkItem();

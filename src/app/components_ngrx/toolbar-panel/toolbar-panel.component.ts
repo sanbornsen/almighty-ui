@@ -30,14 +30,14 @@ import {
 } from 'ngx-login-client';
 import { Space } from 'ngx-fabric8-wit';
 
-import { AreaUI } from '../../models/area.model';
+import { AreaUI, AreaQuery } from '../../models/area.model';
 import { FilterModel } from '../../models/filter.model';
 import { FilterService } from '../../services/filter.service';
 import { LabelUI, LabelQuery } from './../../models/label.model';
 import { WorkItemTypeUI } from '../../models/work-item-type';
 import { WorkItem } from '../../models/work-item';
+import { IterationUI, IterationQuery } from './../../models/iteration.model';
 import { UserUI, UserQuery } from './../../models/user';
-import { IterationUI } from './../../models/iteration.model';
 import { GroupTypeUI } from './../../models/group-types.model';
 
 // ngrx stuff
@@ -112,7 +112,6 @@ export class ToolbarPanelComponent implements OnInit, AfterViewInit, OnDestroy {
     value: 'Loading...',
     iconStyleClass: 'fa fa-spinner'
   };
-  private areaData: Observable<AreaUI[]>;
   private workItemTypeData: Observable<WorkItemTypeUI[]>;
   private stateData: Observable<string[]>;
   private labelData: Observable<LabelUI[]>;
@@ -144,7 +143,9 @@ export class ToolbarPanelComponent implements OnInit, AfterViewInit, OnDestroy {
     private store: Store<AppState>,
     private cdr: ChangeDetectorRef,
     private userQuery: UserQuery,
-    private labelQuery: LabelQuery) {
+    private labelQuery: LabelQuery,
+    private iterationQuery: IterationQuery,
+    private areaQuery: AreaQuery) {
   }
 
   ngOnInit() {
@@ -213,7 +214,7 @@ export class ToolbarPanelComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.eventListeners.push(
       Observable.combineLatest(
-        this.areaData,
+        this.areaQuery.getAreas(),
         this.userQuery.getCollaborators(),
         this.workItemTypeData,
         this.stateData,
@@ -356,9 +357,6 @@ export class ToolbarPanelComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
   initiateDataSources() {
-    this.areaData = this.store
-      .select('listPage').select('areas')
-      .filter(a =>!!a.length);
     this.workItemTypeData = this.store
       .select('listPage').select('workItemTypes')
       .filter(a =>!!a.length);
@@ -373,8 +371,7 @@ export class ToolbarPanelComponent implements OnInit, AfterViewInit, OnDestroy {
     this.filterData = this.store
       .select('toolbar').select('filters')
       .filter(filters => !!filters.length);
-    this.iterationData = this.store
-      .select('listPage').select('iterations')
+    this.iterationData = this.iterationQuery.getIterations()
       .filter(i => !!i.length)
     this.groupTypeData = this.store
       .select('listPage').select('groupTypes')
@@ -384,7 +381,7 @@ export class ToolbarPanelComponent implements OnInit, AfterViewInit, OnDestroy {
   getFilterMap() {
     return {
       area: {
-        datasource: this.areaData,
+        datasource: this.areaQuery.getAreas(),
         datamap: (areas: AreaUI[]) => {
           return {
             queries: areas.map(area => {return {id: area.id, value: area.name}}),
@@ -516,7 +513,7 @@ export class ToolbarPanelComponent implements OnInit, AfterViewInit, OnDestroy {
 
   formatFilterFIelds(fields) {
     Observable.combineLatest(
-      this.areaData,
+      this.areaQuery.getAreas(),
       this.userQuery.getCollaborators(),
       this.workItemTypeData,
       this.stateData,

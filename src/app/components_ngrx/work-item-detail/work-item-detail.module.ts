@@ -53,9 +53,11 @@ import { SafePipeModule } from '../../pipes/safe.module';
 import { EventReducer } from '../../reducers/event.reducer';
 import { EventEffects } from '../../effects/event.effects';
 
+import { IterationQuery } from '../../models/iteration.model';
 import { WorkItemQuery } from './../../models/work-item';
 import { CommentQuery } from './../../models/comment';
 import { LabelQuery } from './../../models/label.model';
+import { AreaQuery } from '../../models/area.model';
 
 @NgModule({
   imports: [
@@ -115,7 +117,9 @@ import { LabelQuery } from './../../models/label.model';
     AuthenticationService,
     TooltipConfig,
     WorkItemTypeControlService,
-    WorkItemQuery
+    IterationQuery,
+    WorkItemQuery,
+    AreaQuery
   ],
   declarations: [
     WorkItemDetailComponent,
