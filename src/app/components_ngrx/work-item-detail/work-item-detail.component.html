@@ -267,8 +267,7 @@
                   class="spinner spinner-sm spinner-inline">
                 </span>
                 <f8-label *ngIf="!loadingLabels"
-                  [labels]='workItem?.labels ?
-                    workItem?.labels : []'
+                  [labels]='workItem?.labelsObs | async'
                   (onRemoveLabel)="removeLable($event)"
                   [allowDelete]="!!loggedInUser"
                   [context]="detailContext">
@@ -277,8 +276,7 @@
                   *ngIf="loggedIn">
                   <label-selector
                     [allLabels]="labels"
-                    [selectedLabels]="workItem?.labels ?
-                      workItem?.labels : []"
+                    [selectedLabels]="workItem?.labelsObs | async"
                     [allowUpdate]="!!loggedInUser"
                     (onCloseSelector)="updateLabels($event)">
                   </label-selector>

@@ -16,7 +16,7 @@ import {
   IterationMapper, IterationService,
   IterationQuery
 } from './iteration.model';
-import { LabelModel, LabelUI, LabelMapper, LabelService } from './label.model';
+import { LabelModel, LabelUI, LabelMapper, LabelService, LabelQuery } from './label.model';
 import { UserUI, UserMapper, UserService, UserQuery } from './user';
 import {
   modelUI,
@@ -146,7 +146,8 @@ export interface WorkItemUI {
   creator: string;
   creatorObs?: Observable<UserUI>;
   type: WorkItemTypeUI;
-  labels: LabelUI[];
+  labels: string[];
+  labelsObs: Observable<LabelUI[]>;
   comments?: CommentUI[];
   children?: WorkItemUI[];
   commentLink: string;
@@ -241,8 +242,8 @@ export class WorkItemMapper implements Mapper<WorkItemService, WorkItemUI> {
       toPath: ['labels'],
       toFunction: function(labels: LabelModel[]) {
         if (!labels) return [];
-        return labels.map(label => this.labelMapper.toUIModel(label))
-      }.bind(this)
+        return labels.map(label => label.id)
+      }
     }, {
       toPath: ['children'],
       toValue: []
@@ -359,7 +360,7 @@ export class WorkItemMapper implements Mapper<WorkItemService, WorkItemUI> {
             type: 'identities'
           }
         })
-      }.bind(this)
+      }
     }, {
       fromPath: ['labels'],
       toPath: ['relationships','labels','data'],
@@ -459,12 +460,6 @@ export class WorkItemResolver {
     }
   }
 
-  resolveWiLabels(labels: LabelUI[]) {
-    this.workItem.labels = this.workItem.labels.map(label => {
-      return cloneDeep(labels.find(l => l.id === label.id));
-    }).filter(item => !!item);
-  }
-
   getWorkItem() {
     return this.workItem;
   }
@@ -484,7 +479,8 @@ export class WorkItemQuery {
     private store: Store<AppState>,
     private userQuery: UserQuery,
     private iterationQuery: IterationQuery,
-    private areaQuery: AreaQuery
+    private areaQuery: AreaQuery,
+    private labelQuery: LabelQuery
   ) {}
 
   getWorkItems(): Observable<WorkItemUI[]> {
@@ -495,7 +491,8 @@ export class WorkItemQuery {
           creatorObs: this.userQuery.getUserObservableById(workItem.creator),
           assigneesObs: this.userQuery.getUserObservablesByIds(workItem.assignees),
           iterationObs: this.iterationQuery.getIterationObservableById(workItem.iterationId),
-          areaObs: this.areaQuery.getAreaObservableById(workItem.areaId)
+          areaObs: this.areaQuery.getAreaObservableById(workItem.areaId),
+          labelsObs: this.labelQuery.getLabelObservablesByIds(workItem.labels)
         };
       });
     })
@@ -510,7 +507,8 @@ export class WorkItemQuery {
         creatorObs: this.userQuery.getUserObservableById(workItem.creator),
         assigneesObs: this.userQuery.getUserObservablesByIds(workItem.assignees),
         iterationObs: this.store.select('listPage').select('iterations').select(workItem.iterationId),
-        areaObs: this.store.select('listPage').select('areas').select(state => state[workItem.areaId])
+        areaObs: this.store.select('listPage').select('areas').select(state => state[workItem.areaId]),
+        labelsObs: this.labelQuery.getLabelObservablesByIds(workItem.labels)
       }
     });
   }
