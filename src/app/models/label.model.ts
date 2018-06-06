@@ -148,7 +148,7 @@ export class LabelQuery {
     return this.store.select(this.getAllLabelsSelector);
   }
 
-  getLabel(number: string): Store<LabelUI> {
+  getLabelObservableById(number: string): Store<LabelUI> {
     const labelSelector = createSelector(
       this.getLabelEntities,
       state => state[number]
@@ -158,6 +158,6 @@ export class LabelQuery {
 
   getLabelObservablesByIds(ids: string[]): Observable<LabelUI[]> {
     if (!ids.length) return Observable.of([]);
-    return Observable.combineLatest(ids.map(id => this.getLabel(id)));
+    return Observable.combineLatest(ids.map(id => this.getLabelObservableById(id)));
   }
 }

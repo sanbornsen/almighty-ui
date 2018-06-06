@@ -366,7 +366,12 @@ export class WorkItemMapper implements Mapper<WorkItemService, WorkItemUI> {
       toPath: ['relationships','labels','data'],
       toFunction: function(labels: LabelUI[]) {
         if (!labels) return null;
-        return labels.map(label => this.labelMapper.toServiceModel(label))
+        return labels.map(
+          label => cleanObject(
+            this.labelMapper.toServiceModel({id: label}),
+            ['attributes', 'links', 'relationships']
+          )
+        );
       }.bind(this)
     }, {
       fromPath: ['hasChildren'],

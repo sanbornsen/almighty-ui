@@ -8,7 +8,7 @@ import { AppState } from './../states/app.state';
 import { UserUI, UserQuery } from './user';
 import { IterationUI, IterationModel, IterationQuery } from './iteration.model';
 import { AreaUI, AreaModel, AreaQuery } from './area.model';
-import { LabelUI, LabelModel } from './label.model';
+import { LabelUI, LabelModel, LabelQuery } from './label.model';
 import { UserService } from 'ngx-login-client';
 import { cloneDeep } from 'lodash';
 import { Store } from '@ngrx/store';
@@ -56,8 +56,8 @@ export interface EventUI {
   modifier?: Observable<UserUI>;
   newValueRelationships: any;
   oldValueRelationships: any;
-  newValueRelationshipsObs: Observable<IterationUI | AreaUI | UserUI>[];
-  oldValueRelationshipsObs: Observable<IterationUI | AreaUI | UserUI>[];
+  newValueRelationshipsObs: Observable<IterationUI | AreaUI | UserUI>[] | Observable<LabelUI[]>;
+  oldValueRelationshipsObs: Observable<IterationUI | AreaUI | UserUI>[] | Observable<LabelUI[]>;
   type: string | null;
 }
 
@@ -136,38 +136,6 @@ export class EventMapper implements Mapper<EventService, EventUI> {
   }
 }
 
-export class EventResolver {
-  constructor(private event: EventUI, private state) {
-    switch (event.name) {
-      case 'system.labels':
-        this.resolve(state.labels);
-        break;
-
-      default:
-        break;
-    }
-  }
-
-  getEvent() {
-    return this.event;
-  }
-
-  resolve(data) {
-    if (this.event.newValueRelationships.length > 0) {
-      this.event.type = this.event.newValueRelationships[0].type;
-      this.event.newValueRelationships = this.event.newValueRelationships.map(item => {
-        return cloneDeep(data.find(u => u.id === item.id));
-      }).filter(item => !!item);
-    }
-    if (this.event.oldValueRelationships.length > 0) {
-      this.event.type = this.event.oldValueRelationships[0].type;
-      this.event.oldValueRelationships = this.event.oldValueRelationships.map(item => {
-        return cloneDeep(data.find(u => u.id === item.id));
-      }).filter(item => !!item);
-    }
-  }
-}
-
 @Injectable()
 export class EventQuery {
   private eventSource = this.store
@@ -178,7 +146,8 @@ export class EventQuery {
     private store: Store<AppState>,
     private userQuery: UserQuery,
     private iterationQuery: IterationQuery,
-    private areaQuery: AreaQuery
+    private areaQuery: AreaQuery,
+    private labelQuery: LabelQuery
   ) { }
 
   getEventsWithModifier(): Observable<EventUI[]> {
@@ -219,6 +188,21 @@ export class EventQuery {
                   return this.userQuery.getUserObservableById(item.id);
                 })
               }
+
+            case 'system.labels':
+              return {
+                ...event,
+                modifier: this.userQuery.getUserObservableById(event.modifierId),
+                newValueRelationshipsObs:
+                  this.labelQuery.getLabelObservablesByIds(
+                    event.newValueRelationships.map(i => i.id)
+                  ),
+                oldValueRelationshipsObs:
+                  this.labelQuery.getLabelObservablesByIds(
+                    event.oldValueRelationships.map(i => i.id)
+                  )
+              }
+
             default:
               return {
                 ...event,

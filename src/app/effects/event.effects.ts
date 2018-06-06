@@ -6,13 +6,13 @@ import { Store } from "@ngrx/store";
 import { AppState } from "../states/app.state";
 import { Observable } from "rxjs";
 import * as EventActions from './../actions/event.action';
-import { EventMapper, EventUI, EventService, EventResolver } from "../models/event.model";
+import { EventMapper, EventUI, EventService } from "../models/event.model";
 
 export type Action = EventActions.All;
 
 @Injectable()
 export class EventEffects {
-  private eventMapper: EventMapper = 
+  private eventMapper: EventMapper =
     new EventMapper();
   constructor(
     private actions$: Actions,
@@ -30,22 +30,21 @@ export class EventEffects {
           newItem => eventUI.oldValueRelationships.findIndex(
             oldItem => oldItem.id === newItem.id
           ) === -1
-        );  
+        );
         let removed = eventUI.oldValueRelationships.filter(
           oldItem => eventUI.newValueRelationships.findIndex(
             newItem => newItem.id === oldItem.id
           ) === -1
-        );  
+        );
         eventUI.newValueRelationships = added;
         eventUI.oldValueRelationships = removed;
         if(eventUI.newValueRelationships.length > 0) {
           eventUI.type = eventUI.newValueRelationships[0].type;
         } else if(eventUI.oldValueRelationships.length > 0) {
-          eventUI.type = eventUI.newValueRelationships[0].type;
+          eventUI.type = eventUI.oldValueRelationships[0].type;
         }
       }
-      const resolvedEvent = new EventResolver(eventUI, state);
-      return {...resolvedEvent.getEvent()}
+      return {...eventUI};
     })
   }
 

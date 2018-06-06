@@ -343,7 +343,7 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
     workItem['id'] = this.workItem.id;
     workItem['type'] = this.workItem.type;
 
-    workItem['labels'] = labels;
+    workItem['labels'] = labels.map(l => l.id);
     this.store.dispatch(new WorkItemActions.Update(workItem));
   }
 
