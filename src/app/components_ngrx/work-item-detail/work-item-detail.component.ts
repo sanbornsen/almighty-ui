@@ -185,6 +185,9 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
         this._iterations = iterations;
         this.labels = labels;
         this.wiTypes = type;
+        this.store.dispatch(new DetailWorkItemActions.GetWorkItem({
+          number: wiNumber
+        }));
         return this.workItemQuery.getWorkItem(wiNumber);
       })
       .filter(w => w !== null)

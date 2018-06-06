@@ -481,6 +481,10 @@ export class WorkItemQuery {
     .select(state => state.listPage)
     .select(state => state.workItems);
 
+  private workItemDetailSource = this.store
+    .select(state => state.detailPage)
+    .select(state => state.workItem);
+
   constructor(
     private store: Store<AppState>,
     private userQuery: UserQuery
@@ -499,10 +503,7 @@ export class WorkItemQuery {
   }
 
   getWorkItem(number: string | number): Observable<WorkItemUI> {
-    return this.workItemSource.map(workItems => {
-      return workItems.filter(wi => wi.number === number);
-    })
-    .map(items => items.length ? items[0] : null)
+    return this.workItemDetailSource
     .filter(item => item !== null)
     .map(workItem => {
       return {
