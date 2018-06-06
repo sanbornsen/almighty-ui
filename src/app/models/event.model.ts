@@ -6,8 +6,8 @@ import {
 } from './common.model';
 import { AppState } from './../states/app.state';
 import { UserUI, UserQuery } from './user';
-import { IterationUI, IterationModel } from './iteration.model';
-import { AreaUI, AreaModel } from './area.model';
+import { IterationUI, IterationModel, IterationQuery } from './iteration.model';
+import { AreaUI, AreaModel, AreaQuery } from './area.model';
 import { LabelUI, LabelModel } from './label.model';
 import { UserService } from 'ngx-login-client';
 import { cloneDeep } from 'lodash';
@@ -56,6 +56,8 @@ export interface EventUI {
   modifier?: Observable<UserUI>;
   newValueRelationships: any;
   oldValueRelationships: any;
+  newValueRelationshipsObs: Observable<IterationUI | AreaUI | UserUI>[];
+  oldValueRelationshipsObs: Observable<IterationUI | AreaUI | UserUI>[];
   type: string | null;
 }
 
@@ -85,7 +87,12 @@ export class EventMapper implements Mapper<EventService, EventUI> {
     toFunction: (newValue) => {
       if (newValue !== null) {
         if(newValue.hasOwnProperty('data')){
-          return newValue["data"]
+          return newValue["data"].map(item => {
+            return {
+              id: item.id,
+              type: item.type
+            }
+          })
         }else
           return [];
       } else {
@@ -98,7 +105,12 @@ export class EventMapper implements Mapper<EventService, EventUI> {
     toFunction: (oldValue) => {
         if (oldValue !== null) {
         if(oldValue.hasOwnProperty('data'))
-          return oldValue["data"]
+          return oldValue["data"].map(item => {
+            return {
+              id: item.id,
+              type: item.type
+            }
+          })
         else
           return [];
       } else {
@@ -127,18 +139,6 @@ export class EventMapper implements Mapper<EventService, EventUI> {
 export class EventResolver {
   constructor(private event: EventUI, private state) {
     switch (event.name) {
-      case 'system.assignees':
-        this.resolve(state.collaborators);
-        break;
-
-      case 'system.iteration':
-        this.resolve(state.iterations);
-        break;
-
-      case 'system.area':
-        this.resolve(state.areas);
-        break;
-
       case 'system.labels':
         this.resolve(state.labels);
         break;
@@ -153,20 +153,6 @@ export class EventResolver {
   }
 
   resolve(data) {
-    let added = this.event.newValueRelationships.filter(
-      newItem => this.event.oldValueRelationships.findIndex(
-        oldItem => oldItem.id === newItem.id
-      ) === -1
-    );
-
-    let removed = this.event.oldValueRelationships.filter(
-      oldItem => this.event.newValueRelationships.findIndex(
-        newItem => newItem.id === oldItem.id
-      ) === -1
-    );
-
-    this.event.newValueRelationships = added;
-    this.event.oldValueRelationships = removed;
     if (this.event.newValueRelationships.length > 0) {
       this.event.type = this.event.newValueRelationships[0].type;
       this.event.newValueRelationships = this.event.newValueRelationships.map(item => {
@@ -190,16 +176,54 @@ export class EventQuery {
 
   constructor(
     private store: Store<AppState>,
-    private userQuery: UserQuery
+    private userQuery: UserQuery,
+    private iterationQuery: IterationQuery,
+    private areaQuery: AreaQuery
   ) { }
 
   getEventsWithModifier(): Observable<EventUI[]> {
     return this.eventSource
       .map(events => {
         return events.map(event => {
-          return {
-            ...event,
-            modifier: this.userQuery.getUserObservableById(event.modifierId)
+          switch(event.name) {
+            case 'system.iteration':
+              return {
+                ...event,
+                modifier: this.userQuery.getUserObservableById(event.modifierId),
+                newValueRelationshipsObs: event.newValueRelationships.map(item => {
+                  return this.iterationQuery.getIterationObservableById(item.id);
+                }),
+                oldValueRelationshipsObs: event.oldValueRelationships.map(item => {
+                  return this.iterationQuery.getIterationObservableById(item.id);
+                })
+              }
+            case 'system.area':
+              return {
+                ...event,
+                modifier: this.userQuery.getUserObservableById(event.modifierId),
+                newValueRelationshipsObs: event.newValueRelationships.map(item => {
+                  return this.areaQuery.getAreaObservableById(item.id);
+                }),
+                oldValueRelationshipsObs: event.oldValueRelationships.map(item => {
+                  return this.areaQuery.getAreaObservableById(item.id);
+                })
+              }
+            case 'system.assignees':
+              return {
+                ...event,
+                modifier: this.userQuery.getUserObservableById(event.modifierId),
+                newValueRelationshipsObs: event.newValueRelationships.map(item => {
+                  return this.userQuery.getUserObservableById(item.id);
+                }),
+                oldValueRelationshipsObs: event.oldValueRelationships.map(item => {
+                  return this.userQuery.getUserObservableById(item.id);
+                })
+              }
+            default:
+              return {
+                ...event,
+                modifier: this.userQuery.getUserObservableById(event.modifierId)
+              }
           }
         })
       })
