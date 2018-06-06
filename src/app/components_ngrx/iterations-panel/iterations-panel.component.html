@@ -68,9 +68,10 @@
   <!-- Nested Iteration Display -->
   <div class="f8-itr__list"
     [class.show]="sidePanelOpen"
-    [class.hide]="!sidePanelOpen">
+    [class.hide]="!sidePanelOpen"
+    *ngIf="treeIterations | async as iterations">
     <iteration-tree
-      [iterationList]="(treeIterations | async) === null ? [] : (treeIterations | async)"
+      [iterationList]="iterations"
       [collection]="collection"
       [witGroup]="witGroup"
       [showTree]="showTree"

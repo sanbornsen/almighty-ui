@@ -1,8 +1,8 @@
 import { WorkItemTypeControlService } from './../../services/work-item-type-control.service';
 import { FormGroup } from '@angular/forms';
 import { LabelUI, LabelQuery } from './../../models/label.model';
-import { IterationUI, IterationQuery } from './../../models/iteration.model';
-import { AreaUI, AreaQuery } from './../../models/area.model';
+import { IterationUI } from './../../models/iteration.model';
+import { AreaUI } from './../../models/area.model';
 import { UserUI, UserQuery } from './../../models/user';
 import { WorkItemTypeUI } from './../../models/work-item-type';
 import { AuthenticationService } from 'ngx-login-client';
@@ -124,11 +124,9 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
     private workItemService: WorkItemService,
     private workItemTypeControlService: WorkItemTypeControlService,
     private sanitizer: DomSanitizer,
-    private iterationQuery: IterationQuery,
     private userQuery: UserQuery,
     private labelQuery: LabelQuery,
-    private workItemQuery: WorkItemQuery,
-    private areaQuery: AreaQuery
+    private workItemQuery: WorkItemQuery
   ) {
 
   }
@@ -168,9 +166,9 @@ export class WorkItemDetailComponent implements OnInit, OnDestroy, AfterViewChec
   }
 
   setWorkItem(wiNumber: string | number) {
-    this.iterationSource = this.iterationQuery.getIterationsForWorkItem(wiNumber);
+    this.iterationSource = this.workItemQuery.getIterationsForWorkItem(wiNumber);
     this.selectedIterations = this.getSelectedItems(this.iterationSource);
-    this.areaSource = this.areaQuery.getAreasForWorkItem(wiNumber);
+    this.areaSource = this.workItemQuery.getAreasForWorkItem(wiNumber);
     this.selectedAreas = this.getSelectedItems(this.areaSource);
     this.workItemSubscriber =
       this.spaceSource

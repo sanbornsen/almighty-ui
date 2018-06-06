@@ -3,8 +3,7 @@ import {
   modelService,
   Mapper,
   MapTree,
-  switchModel,
-  CommonSelectorUI
+  switchModel
 } from './common.model';
 import { Injectable } from '@angular/core';
 import { Store, createFeatureSelector, createSelector } from '@ngrx/store';
@@ -12,7 +11,6 @@ import { AppState, ListPage } from '../states/app.state';
 import { Observable } from 'rxjs';
 import  {IterationService as Service} from './../services/iteration.service'
 import { iterationUiReducer } from '../reducers/iteration-reducer';
-import { WorkItemQuery } from './work-item';
 
 export class IterationModel extends modelService {
   attributes?: IterationAttributes;
@@ -156,10 +154,10 @@ export class IterationMapper implements Mapper<IterationModel, IterationUI> {
       fromPath: ['parentPath'],
       toPath: ['attributes','parent_path'],
     }, {
-      fromPath: ['resolvedParentPath'],      
+      fromPath: ['resolvedParentPath'],
       toPath: ['attributes','resolved_parent_path'],
     }, {
-      fromPath: ['userActive'],      
+      fromPath: ['userActive'],
       toPath: ['attributes','user_active'],
     }, {
       fromPath: ['isActive'],
@@ -168,7 +166,7 @@ export class IterationMapper implements Mapper<IterationModel, IterationUI> {
       fromPath: ['startAt'],
       toPath: ['attributes','startAt'],
     }, {
-      fromPath: ['endAt'],      
+      fromPath: ['endAt'],
       toPath: ['attributes','endAt'],
     }, {
       fromPath: ['description'],
@@ -179,17 +177,17 @@ export class IterationMapper implements Mapper<IterationModel, IterationUI> {
     }, {
       fromPath: ['link'],
       toPath: ['links','self'],
-    }, {      
+    }, {
       fromPath: ['workItemTotalCount'],
       toPath: ['relationships','workitems','meta','total'],
     }, {
-      fromPath: ['workItemClosedCount'],      
+      fromPath: ['workItemClosedCount'],
       toPath: ['relationships','workitems','meta','closed'],
     }, {
       fromPath: ['hasChildren'],
       toPath: ['hasChildren']
     }, {
-      fromPath: ['parentId'],      
+      fromPath: ['parentId'],
       toPath: ['relationships', 'parent', 'data', 'id'],
     }, {
       toPath: ['relationships', 'parent', 'data', 'type'],
@@ -223,8 +221,7 @@ export class IterationQuery {
   private iterationSource = this.store.select(this.iterationSelector);
 
   constructor(private store: Store<AppState>,
-    private iterationService: Service,
-    private workItemQuery: WorkItemQuery) {}
+    private iterationService: Service) {}
 
   getIterations(): Observable<IterationUI[]> {
     return this.iterationSource.map(iterations => {
@@ -232,7 +229,7 @@ export class IterationQuery {
     });
   }
 
-  getIterationByIdObservable(id: string): Observable<IterationUI> {
+  getIterationObservableById(id: string): Observable<IterationUI> {
     return this.iterationSource.select(state => state[id]);
   }
 
@@ -273,22 +270,5 @@ export class IterationQuery {
       .map((iterations: IterationUI[]) => {
         return iterations.filter((iteration: IterationUI) => iteration.isActive);
     });
-  }
-
-  getIterationsForWorkItem(number: string | number): Observable<CommonSelectorUI[]> {
-    return this.workItemQuery.getWorkItem(number)
-      .filter(w => !!w)
-      .switchMap(workitem => {
-        return this.getIterations().map(iterations => {
-          return iterations.map(i => {
-            return {
-              key: i.id,
-              value: (i.resolvedParentPath!='/'?i.resolvedParentPath:'') + '/' + i.name,
-              selected: i.id === workitem.iterationId,
-              cssLabelClass: undefined
-            }
-          })
-        });
-      })
   }
 }

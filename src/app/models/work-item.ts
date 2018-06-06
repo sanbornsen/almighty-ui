@@ -11,7 +11,11 @@ import {
 import { AreaModel, AreaUI, AreaMapper, AreaService, AreaQuery } from './area.model';
 import { Comments, Comment, CommentUI, CommentMapper } from './comment';
 import { Link } from './link';
-import { IterationModel, IterationUI, IterationMapper, IterationService } from './iteration.model';
+import {
+  IterationModel, IterationUI,
+  IterationMapper, IterationService,
+  IterationQuery
+} from './iteration.model';
 import { LabelModel, LabelUI, LabelMapper, LabelService } from './label.model';
 import { UserUI, UserMapper, UserService, UserQuery } from './user';
 import {
@@ -20,7 +24,8 @@ import {
   Mapper,
   MapTree,
   switchModel,
-  cleanObject
+  cleanObject,
+  CommonSelectorUI
 } from './common.model';
 //import {IterationQuery} from './iteration.model';
 
@@ -477,7 +482,9 @@ export class WorkItemQuery {
 
   constructor(
     private store: Store<AppState>,
-    private userQuery: UserQuery
+    private userQuery: UserQuery,
+    private iterationQuery: IterationQuery,
+    private areaQuery: AreaQuery
   ) {}
 
   getWorkItems(): Observable<WorkItemUI[]> {
@@ -487,8 +494,8 @@ export class WorkItemQuery {
           ...workItem,
           creatorObs: this.userQuery.getUserObservableById(workItem.creator),
           assigneesObs: this.userQuery.getUserObservablesByIds(workItem.assignees),
-          iterationObs: this.store.select('listPage').select('iterations').select(workItem.iterationId),
-          areaObs: this.store.select('listPage').select('areas').select(state => state[workItem.areaId])
+          iterationObs: this.iterationQuery.getIterationObservableById(workItem.iterationId),
+          areaObs: this.areaQuery.getAreaObservableById(workItem.areaId)
         };
       });
     })
@@ -506,5 +513,54 @@ export class WorkItemQuery {
         areaObs: this.store.select('listPage').select('areas').select(state => state[workItem.areaId])
       }
     });
+  }
+
+  /**
+   * This function returns an observable for the the selector component
+   * with iteration data and the selected iteration flagged
+   * This data can be used in work item detail page for the
+   * iteration selector dropdown.
+   * @param number
+   */
+  getIterationsForWorkItem(number: string | number): Observable<CommonSelectorUI[]> {
+    return this.getWorkItem(number)
+      .filter(w => !!w)
+      .switchMap(workitem => {
+        return this.iterationQuery.getIterations().map(iterations => {
+          return iterations.map(i => {
+            return {
+              key: i.id,
+              value: (i.resolvedParentPath!='/'?i.resolvedParentPath:'') + '/' + i.name,
+              selected: i.id === workitem.iterationId,
+              cssLabelClass: undefined
+            }
+          })
+        });
+      })
+  }
+
+  /**
+   * This function returns an observable for the the selector component
+   * with area data and the selected area flagged
+   * This data can be used in work item detail page for the
+   * area selector dropdown.
+   * @param number
+   */
+  getAreasForWorkItem(number: string | number): Observable<CommonSelectorUI[]> {
+    return this.getWorkItem(number)
+      .filter(w => !!w)
+      .switchMap(workItem => {
+        return this.areaQuery.getAreas()
+          .map(areas => {
+            return areas.map(area => {
+              return {
+                key: area.id,
+                value: (area.parentPathResolved!='/'?area.parentPathResolved:'') + '/' + area.name,
+                selected: area.id === workItem.areaId,
+                cssLabelClass: undefined
+              }
+            })
+          })
+      })
   }
 }
