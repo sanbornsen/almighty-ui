@@ -75,10 +75,7 @@ describe('WorkItemMapper', () => {
         "iteration": {
           "data": {
             "id": "2561c0c9-6d36-46de-89f4-41cbe5b02cd3",
-            "type": "iterations",
-            "links": {
-              "self": "https://api.openshift.io/api/iterations/2561c0c9-6d36-46de-89f4-41cbe5b02cd3"
-            }
+            "type": "iterations"
           }
         },
         "labels": {
@@ -116,20 +113,9 @@ describe('WorkItemMapper', () => {
         version: 14,
         link: 'https://api.openshift.io/api/workitems/8bccc228-bba7-43ad-b077-15fbb9148f7f',
         WILinkUrl: 'https://api.openshift.io/api/workitems/8bccc228-bba7-43ad-b077-15fbb9148f7f/links',
-        area: {
-          id: 'e5fc1d21-5c56-4aef-a58a-068865621881',
-          name: null, parentPath: null, parentPathResolved: null
-        },
+        areaId: 'e5fc1d21-5c56-4aef-a58a-068865621881',
         creator: '29f698d6-5c65-4129-9e97-5286cdb18a1c',
-        iteration: {
-          id: '2561c0c9-6d36-46de-89f4-41cbe5b02cd3',
-          name: null, parentPath: null, resolvedParentPath: null,
-          userActive: null, isActive: null, startAt: null,
-          endAt: null, description: null, state: null,
-          link: 'https://api.openshift.io/api/iterations/2561c0c9-6d36-46de-89f4-41cbe5b02cd3',
-          workItemTotalCount: null, workItemClosedCount: null, hasChildren: null,
-          parentId: null, selected: false, showChildren: false
-        },
+        iterationId: '2561c0c9-6d36-46de-89f4-41cbe5b02cd3',
         type: {
           id: '71171e90-6d35-498f-a6a7-2083b5267c18', name: null, icon: null,
           version: null, description: null, childTypes: [], type: "workitemtypes", fields: null,
