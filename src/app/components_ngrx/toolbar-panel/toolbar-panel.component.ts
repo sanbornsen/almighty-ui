@@ -35,7 +35,7 @@ import { FilterModel } from '../../models/filter.model';
 import { FilterService } from '../../services/filter.service';
 import { LabelUI, LabelQuery } from './../../models/label.model';
 import { WorkItemTypeUI } from '../../models/work-item-type';
-import { WorkItem } from '../../models/work-item';
+import { WorkItem, WorkItemQuery } from '../../models/work-item';
 import { IterationUI, IterationQuery } from './../../models/iteration.model';
 import { UserUI, UserQuery } from './../../models/user';
 import { GroupTypeUI } from './../../models/group-types.model';
@@ -145,7 +145,8 @@ export class ToolbarPanelComponent implements OnInit, AfterViewInit, OnDestroy {
     private userQuery: UserQuery,
     private labelQuery: LabelQuery,
     private iterationQuery: IterationQuery,
-    private areaQuery: AreaQuery) {
+    private areaQuery: AreaQuery,
+    private workItemQuery: WorkItemQuery) {
   }
 
   ngOnInit() {
@@ -168,13 +169,9 @@ export class ToolbarPanelComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.routeSource.subscribe(queryParam => this.queryExp = queryParam.q);
 
-    const customQueriesData = this.store
-      .select('listPage')
-      .select('customQueries')
+    const customQueriesData = this.workItemQuery.getWorkItems()
       .filter(customQueries => !!customQueries.length);
-      this.totalCount = this.store
-      .select('listPage')
-      .select('workItems')
+    this.totalCount = this.workItemQuery.getWorkItems()
       .map(items => {
         if(this.isShowTreeOn) {
           return items.filter(item => item.bold === true).length;

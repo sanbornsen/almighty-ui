@@ -56,8 +56,8 @@ export interface EventUI {
   modifier?: Observable<UserUI>;
   newValueRelationships: any;
   oldValueRelationships: any;
-  newValueRelationshipsObs: Observable<IterationUI | AreaUI | UserUI>[] | Observable<LabelUI[]>;
-  oldValueRelationshipsObs: Observable<IterationUI | AreaUI | UserUI>[] | Observable<LabelUI[]>;
+  newValueRelationshipsObs?: Observable<IterationUI | AreaUI | UserUI>[] | Observable<LabelUI[]>;
+  oldValueRelationshipsObs?: Observable<IterationUI | AreaUI | UserUI>[] | Observable<LabelUI[]>;
   type: string | null;
 }
 

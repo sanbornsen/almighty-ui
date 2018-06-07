@@ -1,6 +1,7 @@
-import { AppState } from './../states/app.state';
+import { AppState, ListPage } from './../states/app.state';
 import { Observable } from 'rxjs';
-import { Store } from '@ngrx/store';
+import { Store, createFeatureSelector, createSelector } from '@ngrx/store';
+import { EntityState, createEntityAdapter } from '@ngrx/entity';
 import { Injectable } from '@angular/core';
 import { cloneDeep } from 'lodash';
 import {
@@ -8,7 +9,10 @@ import {
   WorkItemTypeUI,
   WorkItemTypeMapper
 } from './work-item-type';
-import { AreaModel, AreaUI, AreaMapper, AreaService, AreaQuery } from './area.model';
+import {
+  AreaModel, AreaUI, AreaMapper,
+  AreaService, AreaQuery
+} from './area.model';
 import { Comments, Comment, CommentUI, CommentMapper } from './comment';
 import { Link } from './link';
 import {
@@ -16,7 +20,10 @@ import {
   IterationMapper, IterationService,
   IterationQuery
 } from './iteration.model';
-import { LabelModel, LabelUI, LabelMapper, LabelService, LabelQuery } from './label.model';
+import {
+   LabelModel, LabelUI, LabelMapper,
+   LabelService, LabelQuery
+} from './label.model';
 import { UserUI, UserMapper, UserService, UserQuery } from './user';
 import {
   modelUI,
@@ -138,7 +145,7 @@ export interface WorkItemUI {
   dynamicfields?: any;
 
   areaId: string;
-  areaObs: Observable<AreaUI>;
+  areaObs?: Observable<AreaUI>;
   iterationId: string;
   iterationObs?: Observable<IterationUI>;
   assignees: string[];
@@ -163,7 +170,18 @@ export interface WorkItemUI {
   bold: boolean; // false
 
   createId?: number; // this is used to identify newly created item
+  selected: boolean;
 }
+
+export interface WorkItemStateModel extends EntityState<WorkItemUI> {}
+
+const workItemAdapter = createEntityAdapter<WorkItemUI>();
+const {
+  selectIds,
+  selectEntities,
+  selectAll,
+  selectTotal,
+} = workItemAdapter.getSelectors();
 
 export class WorkItemMapper implements Mapper<WorkItemService, WorkItemUI> {
   itMapper = new IterationMapper();
@@ -472,14 +490,6 @@ export class WorkItemResolver {
 
 @Injectable()
 export class WorkItemQuery {
-  private workItemSource = this.store
-    .select(state => state.listPage)
-    .select(state => state.workItems);
-
-  private workItemDetailSource = this.store
-    .select(state => state.detailPage)
-    .select(state => state.workItem);
-
   constructor(
     private store: Store<AppState>,
     private userQuery: UserQuery,
@@ -487,6 +497,26 @@ export class WorkItemQuery {
     private areaQuery: AreaQuery,
     private labelQuery: LabelQuery
   ) {}
+
+  private listPageSelector = createFeatureSelector<ListPage>('listPage');
+  private workItemSelector = createSelector(
+    this.listPageSelector,
+    state => state.workItems
+  );
+  private workItemEntities = createSelector(
+    this.workItemSelector,
+    selectEntities
+  );
+  private getAllWorkItemSelector = createSelector(
+    this.workItemSelector,
+    selectAll
+  );
+  private workItemSource = this.store
+    .select(this.getAllWorkItemSelector);
+
+  private workItemDetailSource = this.store
+    .select(state => state.detailPage)
+    .select(state => state.workItem);
 
   getWorkItems(): Observable<WorkItemUI[]> {
     return this.workItemSource.map(workItems => {

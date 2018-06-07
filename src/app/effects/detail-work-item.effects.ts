@@ -69,7 +69,9 @@ export class DetailWorkItemEffects {
     .switchMap(wp => {
       const state = wp.state;
       const payload = wp.payload;
-      const workItem = state.workItems.find(w => w.number === payload.number);
+      const workItem = Object.keys(state.workItems.entities)
+        .map(id => state.workItems.entities[id])
+        .find(w => w.number === payload.number);
       // If work item found in the existing list
       if (workItem) {
         return Observable
