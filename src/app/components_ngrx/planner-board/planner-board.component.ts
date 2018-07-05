@@ -17,9 +17,9 @@ import { SpaceQuery } from './../../models/space';
 export class PlannerBoardComponent implements AfterViewChecked, OnInit, OnDestroy {
     @ViewChild('boardContainer') boardContainer: ElementRef;
 
-    private uiLockedSidebar: boolean = false;
-    private sidePanelOpen: boolean = true;
-    private eventListeners: any[] = [];
+    public uiLockedSidebar: boolean = false;
+    public sidePanelOpen: boolean = true;
+    public eventListeners: any[] = [];
 
     constructor(
       private renderer: Renderer2,
