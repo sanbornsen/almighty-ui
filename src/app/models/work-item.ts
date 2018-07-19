@@ -635,10 +635,16 @@ export class WorkItemQuery {
     return this.store.select(workItemEntities);
   }
 
-  getWorkItemsWithIds(ids: string[]): Store<WorkItemUI[]> {
+  getWorkItemsByIds(ids: string[]): Store<WorkItemUI[]> {
     const selector = createSelector(
       workItemEntities,
-      state => ids.map(i => this.resolveWorkItem(state[i]))
+      state => {
+        return ids.map(i => state[i])
+          // Sometime
+          .filter(item => !!item)
+          .map(item => this.resolveWorkItem(item))
+          .sort((a, b) => a.order - b.order);
+      }
     );
     return this.store.select(selector);
   }
