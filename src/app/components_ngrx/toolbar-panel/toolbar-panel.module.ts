@@ -27,6 +27,7 @@ import { FilterReducer } from './../../reducers/filter.reducer';
 import {
   initialState as initialFilterState
 } from './../../states/filter.state';
+import { InlineInputModule } from './../../widgets/inlineinput/inlineinput.module';
 
 @NgModule({
   imports: [
@@ -37,6 +38,7 @@ import {
     ToolbarModule,
     TooltipModule.forRoot(),
     WidgetsModule,
+    InlineInputModule,
     StoreModule.forFeature('toolbar', {
       filters: FilterReducer
     }, {

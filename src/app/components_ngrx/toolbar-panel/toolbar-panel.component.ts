@@ -45,6 +45,7 @@ import { Store } from '@ngrx/store';
 import * as CustomQueryActions from './../../actions/custom-query.actions';
 import * as FilterActions from './../../actions/filter.actions';
 import * as SpaceActions from './../../actions/space.actions';
+import { SpaceQuery } from './../../models/space';
 import { AppState } from './../../states/app.state';
 
 @Component({
@@ -146,7 +147,8 @@ export class ToolbarPanelComponent implements OnInit, AfterViewInit, OnDestroy {
     private labelQuery: LabelQuery,
     private iterationQuery: IterationQuery,
     private areaQuery: AreaQuery,
-    private workItemQuery: WorkItemQuery) {
+    private workItemQuery: WorkItemQuery,
+    private spaceQuery: SpaceQuery) {
   }
 
   ngOnInit() {
@@ -672,5 +674,17 @@ export class ToolbarPanelComponent implements OnInit, AfterViewInit, OnDestroy {
 
   saveFilterDropdownChange(value: boolean) {
     this.isFilterSaveOpen = value;
+  }
+
+  performQuery({value, callBack}) {
+    if (value) {
+      this.spaceQuery.getCurrentSpace.take(1)
+        .subscribe(space => {
+          let query = {...this.route.snapshot.queryParams};
+          query['q'] = `(space:${space.id} $AND ${value})`;
+          this.router.navigate([], {queryParams: query});
+        });
+    }
+    callBack('');
   }
 }

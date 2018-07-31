@@ -589,17 +589,21 @@ export class FilterService {
 
   // Temporary function to deal with single level $AND operator
   queryToFlat(query: string) {
-    return query.replace(/^\((.+)\)$/, '$1')
-      .split(this.and_notation).map((item, index) => {
-        // regex to match field:value pattern.
-        // for item=title:A:D, field -> title and value -> A:D
-        let filterValue = /(^[^:]+):(.*)$/.exec(item);
-      return {
-        field: filterValue[1].trim(),
-        index: index,
-        value: filterValue[2].trim()
-      };
-    });
+    try {
+      return query.replace(/^\((.+)\)$/, '$1')
+        .split(this.and_notation).map((item, index) => {
+          // regex to match field:value pattern.
+          // for item=title:A:D, field -> title and value -> A:D
+          let filterValue = /(^[^:]+):(.*)$/.exec(item);
+        return {
+          field: filterValue[1].trim(),
+          index: index,
+          value: filterValue[2].trim()
+        };
+      });
+    } catch {
+      return [];
+    }
   }
 
   flatToQuery(arr: any[]) {

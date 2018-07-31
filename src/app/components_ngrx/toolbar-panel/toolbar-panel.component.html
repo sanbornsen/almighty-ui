@@ -8,7 +8,7 @@
     (onFilterTypeAhead)="filterQueries($event)">
   </pfng-toolbar>
 </div>
-<div class="f8-filters">  
+<div class="f8-filters">
   <span class="dib margin-right-10"
     *ngIf="activeFilterFromSidePane !== ''">
     <strong>{{ totalCount | async }}</strong> in {{ activeFilterFromSidePanel }}
@@ -54,7 +54,7 @@
           <button class="btn btn-primary pull-right margin-left-5 save-cq-btn"
             (click)="saveFilters(filterSaveInp)"
             [disabled]="!filterSaveInp.value">Save</button>
-          <button class="btn pull-right margin-right-5 cancel-cq-btn" 
+          <button class="btn pull-right margin-right-5 cancel-cq-btn"
             (click)="closeFilterSave(filterSaveInp)">Cancel</button>
         </div>
       </div>
@@ -64,6 +64,11 @@
 <ng-template #actionsTemplate>
 </ng-template>
 <ng-template #addTemplate>
+  <f8-inlineinput
+    class="query-input"
+    [placeholder]="'Enter your query'"
+    (onSave)="performQuery($event)"
+    ></f8-inlineinput>
   <input type="checkbox"
     name="show completed" id="showCompleted"
     [checked]="isShowCompletedOn"
