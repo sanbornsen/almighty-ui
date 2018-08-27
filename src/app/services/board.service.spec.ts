@@ -1,21 +1,24 @@
 import { TestBed } from '@angular/core/testing';
 import { Response, ResponseOptions } from '@angular/http';
 import { Observable } from 'rxjs';
+import { delay } from 'rxjs/operators';
 
 import { BoardService } from './board.service';
-import { HttpService } from './http-service';
 
+import { HttpClientService } from '../shared/http-module/http.service';
+import { PlannerHttpClientModule } from './../shared/http-module/http.module';
 import { boardsResponse, spaceTemplateResponse } from './board.snapshot';
 
 describe('BoardService :: ', () => {
   beforeEach(() => {
-    const mockHttpService = jasmine.createSpyObj('HttpService', ['get']);
+    const mockHttpClientService = jasmine.createSpyObj('HttpClientService', ['get']);
 
     TestBed.configureTestingModule({
+      imports: [PlannerHttpClientModule],
       providers: [
         {
-          provide: HttpService,
-          useValue: mockHttpService
+          provide: HttpClientService,
+          useValue: mockHttpClientService
         },
         BoardService
       ]
@@ -31,14 +34,7 @@ describe('BoardService :: ', () => {
   it('getBoardApiUrl :: Should fetch board api URL', done => {
     const boardService = TestBed.get(BoardService);
     boardService.http.get.and.returnValue(
-      Observable.of(
-        new Response(
-          new ResponseOptions({
-            body: JSON.stringify(spaceTemplateResponse),
-            status: 200
-          })
-        )
-      ).delay(100)
+      Observable.of(spaceTemplateResponse).pipe(delay(200))
     );
     boardService.getBoardApiUrl('').subscribe(url => {
       expect(url).toEqual(
@@ -51,14 +47,8 @@ describe('BoardService :: ', () => {
   it('getBoards :: Should fetch list of boards', done => {
     const boardService = TestBed.get(BoardService);
     boardService.http.get.and.returnValue(
-      Observable.of(
-        new Response(
-          new ResponseOptions({
-            body: JSON.stringify(boardsResponse),
-            status: 200
-          })
-        )
-      ).delay(100)
+      Observable.of(boardsResponse)
+      .pipe(delay(200))
     );
     boardService.getBoards('').subscribe(resp => {
       expect(resp).toEqual(boardsResponse);
