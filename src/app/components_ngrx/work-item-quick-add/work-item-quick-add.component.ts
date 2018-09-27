@@ -16,7 +16,7 @@ import {
 import { ActivatedRoute } from '@angular/router';
 import { Logger } from 'ngx-base';
 import { AuthenticationService } from 'ngx-login-client';
-import { filter } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 import { WorkItem, WorkItemRelations, WorkItemService } from '../../models/work-item';
 import { WorkItemTypeUI } from '../../models/work-item-type';
 import { IterationUI } from './../../models/iteration.model';
@@ -25,7 +25,7 @@ import { WorkItemQuery } from './../../models/work-item';
 
 // ngrx stuff
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import * as WorkItemActions from './../../actions/work-item.actions';
 import { AppState } from './../../states/app.state';
 
@@ -55,8 +55,12 @@ export class WorkItemQuickAddComponent implements OnInit, OnDestroy, AfterViewIn
   linkObject: object;
   ifOpenshift_io: boolean;
   currentUserID: string;
+  blockAddInternally: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   addDisabled: Observable<boolean> =
-    this.permissionQuery.isAllowedToAdd();
+    combineLatest(
+      this.permissionQuery.isAllowedToAdd(),
+      this.blockAddInternally
+    ).pipe(map(([disable, internallyBlocked]) => disable || internallyBlocked));
 
   // Board view specific
   initialDescHeight: number = 0;
@@ -66,7 +70,6 @@ export class WorkItemQuickAddComponent implements OnInit, OnDestroy, AfterViewIn
   showQuickAdd: boolean;
   createId: number= 0;
   eventListeners: any[] = [];
-  blockAdd: boolean = false;
   infotipSource = this.store
   .select('planner')
   .select('infotips');
@@ -189,7 +192,7 @@ export class WorkItemQuickAddComponent implements OnInit, OnDestroy, AfterViewIn
     this.createId = new Date().getTime();
 
     if (this.workItem.attributes['system.title']) {
-      this.blockAdd = true;
+      this.blockAddInternally.next(true);
       this.onStartCreateWI.emit(this.parentWorkItemId);
       this.store.dispatch(new WorkItemActions.Add({
         createId: this.createId,
@@ -198,7 +201,7 @@ export class WorkItemQuickAddComponent implements OnInit, OnDestroy, AfterViewIn
         openDetailPage: openStatus
       }));
     } else {
-      this.blockAdd = false;
+      this.blockAddInternally.next(false);
       this.error = 'Title can not be empty.';
     }
   }
@@ -216,7 +219,7 @@ export class WorkItemQuickAddComponent implements OnInit, OnDestroy, AfterViewIn
     this.createWorkItemObj();
     this.showQuickAdd = true;
     this.descHeight = this.initialDescHeight ? this.initialDescHeight : '26px';
-    this.blockAdd = false;
+    this.blockAddInternally.next(false);
     if (this.qaTitle) {
       this.qaTitle.nativeElement.focus();
     }
